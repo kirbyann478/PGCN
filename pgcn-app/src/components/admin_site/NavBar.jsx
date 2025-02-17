@@ -2,23 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
-import { Dropdown } from 'bootstrap';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from './Sidebar'; 
+import Sidebar from './Sidebar';  
 
 function NavBar() {
     const [isSidebarVisible, setIsSidebarVisible] = useState(true);
-    const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
     const [account, setAccount] = useState(null); // Track user account details
-    const [loading, setLoading] = useState(true); // Track loading state
+    const [isUserLoggedIn, setIsUserLoggedIn] = useState(false); // Check if the user is logged in
     const navigate = useNavigate();
 
+    // Dropdown initialization once the component has mounted
     useEffect(() => {
-        // Initialize the dropdown when the component mounts
-        const dropdownElementList = document.querySelectorAll('.dropdown-toggle');
-        dropdownElementList.forEach(dropdown => {
-            new Dropdown(dropdown);
-        });
+        // Ensure Bootstrap is loaded and dropdown is initialized
+        if (window.bootstrap) {
+            const dropdownElementList = document.querySelectorAll('.dropdown-toggle');
+            dropdownElementList.forEach(dropdown => {
+                new window.bootstrap.Dropdown(dropdown);
+            });
+        } else {
+            console.error("Bootstrap is not loaded!");
+        }
     }, []);
 
     // Toggle sidebar visibility
@@ -51,7 +54,7 @@ function NavBar() {
                     <ul className="d-flex align-items-center">
                         <li className="nav-item dropdown pe-3">
                             <Link
-                                className="nav-link nav-profile d-flex align-items-center justify-content-center pe-0 "
+                                className="nav-link nav-profile d-flex align-items-center justify-content-center pe-0"
                                 to="/admin/notification"
                             >
                                 <img
@@ -66,7 +69,7 @@ function NavBar() {
 
                         <li className="nav-item dropdown pe-3">
                             <button
-                                className="nav-link nav-profile d-flex align-items-center justify-content-center pe-0"
+                                className="nav-link nav-profile d-flex align-items-center justify-content-center pe-0 dropdown-toggle"
                                 data-bs-toggle="dropdown"
                                 aria-expanded="false"
                             >
@@ -99,12 +102,12 @@ function NavBar() {
                                 <li>
                                     <hr className="dropdown-divider" />
                                 </li>  
-                                    <li>
-                                        <Link className="dropdown-item d-flex align-items-center" to="/login">
-                                            <i className="bi bi-box-arrow-right"></i>
-                                            <span>Login</span>
-                                        </Link>
-                                    </li> 
+                                <li>
+                                    <Link className="dropdown-item d-flex align-items-center" to="/login">
+                                        <i className="bi bi-box-arrow-right"></i>
+                                        <span>Login</span>
+                                    </Link>
+                                </li> 
                             </ul>
                         </li>
                     </ul>

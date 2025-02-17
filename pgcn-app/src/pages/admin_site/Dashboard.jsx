@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import NavBar from "../../components/Navbar";
-import DashboardContent from "../../components/DashboardContent";
+import { useEffect, useState } from "react";  
+import NavBar from "../../components/admin_site/NavBar";
+import DashboardContent from "../../components/admin_site/DashboardContent";
 
 function AdminDashboard(){
 
