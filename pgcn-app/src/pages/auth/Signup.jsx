@@ -1,4 +1,4 @@
-import SignupForm from "../../components/admin_site/SignupForm";
+import SignupForm from "../../components/auth/SignupForm";
 
 
 function Signup(){

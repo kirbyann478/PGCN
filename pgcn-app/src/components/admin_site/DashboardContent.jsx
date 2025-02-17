@@ -62,12 +62,12 @@ function DashboardContent() {
 
                                                 <div className="card-body">
                                                     <h5 className="card-title">
-                                                        Total Patient Record
-                                                        <span>| Today</span>
+                                                        Test 1
+                                                        <span> | Today</span>
                                                     </h5>
                                                     <div className="d-flex align-items-center">
                                                         <div className="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                                            <img src="../../assets/img/med_logo.png" alt="1" />
+                                                            {/* <img src="../../assets/img/med_logo.png" alt="1" /> */}
                                                         </div>
                                                         <div className="ps-3">
                                                             <h6 id="totalNumberEmployee"></h6>
@@ -98,11 +98,11 @@ function DashboardContent() {
                                                 </div>
 
                                                 <div className="card-body">
-                                                    <h5 className="card-title">Total Ambulance Service &nbsp; <span>| Today</span></h5>
+                                                    <h5 className="card-title">Test 2 &nbsp; <span>| Today</span></h5>
 
                                                     <div className="d-flex align-items-center">
                                                         <div className="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                                            <img src="../../assets/img/ambulance_logo.png" alt="1" />
+                                                            {/* <img src="../../assets/img/ambulance_logo.png" alt="1" /> */}
                                                         </div>
                                                         <div className="ps-3">
                                                             <h6 id="pendingRequest">10</h6>
@@ -129,11 +129,11 @@ function DashboardContent() {
                                                 </div>
 
                                                 <div className="card-body">
-                                                    <h5 className="card-title">Total Account Registered &nbsp; <span>| Today</span></h5>
+                                                    <h5 className="card-title">Test 3 &nbsp; <span>| Today</span></h5>
 
                                                     <div className="d-flex align-items-center">
                                                         <div className="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                                            <img src="../../assets/img/dashboard/dash1.png" alt="1" />
+                                                            {/* <img src="../../assets/img/dashboard/dash1.png" alt="1" /> */}
                                                         </div>
                                                         <div className="ps-3">
                                                             <h6 id="pendingRequest">2</h6>
@@ -151,7 +151,7 @@ function DashboardContent() {
                                             <div className="card info-card revenue-card">
 
                                                 <div className="card-body">
-                                                    <h5 className="card-title">Patient Care Report Chart &nbsp;  </h5>
+                                                    <h5 className="card-title">Test 4 &nbsp;  </h5>
 
 
                                                     <div className="d-flex align-items-center">

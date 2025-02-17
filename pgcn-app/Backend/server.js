@@ -107,5 +107,39 @@ app.post("/create_account", (req, res) => {
     });
 });
 
+app.post("/login", (req, res) => {
+    const { email, password } = req.body;
+
+    // Check if the email exists in the accounts table
+    db.query("SELECT * FROM accounts WHERE email = ?", [email], (err, results) => {
+        if (err) {
+            console.error("Database Error:", err);
+            return res.status(500).json({ error: "Internal server error." });
+        }
+
+        // If the email doesn't exist
+        if (results.length === 0) {
+            return res.status(400).json({ error: "Invalid email or password." });
+        }
+
+        const user = results[0];
+
+        // Compare the provided password with the stored hashed password
+        bcrypt.compare(password, user.password, (err, isMatch) => {
+            if (err) {
+                console.error("Password Comparison Error:", err);
+                return res.status(500).json({ error: "Internal server error." });
+            }
+
+            // If the password does not match
+            if (!isMatch) {
+                return res.status(400).json({ error: "Invalid email or password." });
+            }
+
+            // If email and password are correct, you can return a success message or generate a token (e.g., JWT)
+            res.json({ message: "Login successful", account_id: user.account_id });
+        });
+    });
+});
 
 app.listen(process.env.VITE_FIREBASE_PORT, () => console.log(`Server running on port ${process.env.VITE_FIREBASE_PORT}`));

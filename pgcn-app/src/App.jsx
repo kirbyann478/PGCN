@@ -9,9 +9,11 @@ function App() {
     
     <BrowserRouter>
       <Routes>
-        {/* Admin Pages */}
+        {/* Auth Pages */}
         <Route path="" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+
+        {/* Admin Pages */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
       </Routes>

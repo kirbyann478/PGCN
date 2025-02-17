@@ -15,6 +15,9 @@ function Sidebar({ isVisible }) {
             {isVisible && (
                 <aside id="sidebar" className="sidebar">
                     <ul className="sidebar-nav" id="sidebar-nav">
+                        
+                        <li className="nav-heading">ADMIN TOOL</li>
+
                         <li className="nav-item">
                             <Link
                                 className={`nav-link ${isActive('/admin/dashboard') ? '' : 'collapsed'}`}
@@ -25,32 +28,42 @@ function Sidebar({ isVisible }) {
                                 <span>Dashboard</span>
                             </Link>
                         </li>
-
-                        <hr />
-
-                        <li className="nav-heading">MANAGE PATIENT CARE REPORT</li>
-
+                        
                         <li className="nav-item">
                             <Link
-                                className={`nav-link ${isActive('/admin/manage_patient_records') ? '' : 'collapsed'}`}
-                                to="/admin/manage_patient_records" // Use 'to' instead of 'href'
+                                className={`nav-link ${isActive('/admin/transactions') ? '' : 'collapsed'}`}
+                                id="dashboard"
+                                to="/admin/dashboard" // Use 'to' instead of 'href'
                             >
-                                <i className="bx bxs-briefcase"></i>
-                                <span>Patient Care Records</span>
-                            </Link>
-
-                            <Link
-                                className={`nav-link ${isActive('/admin/manage_tracking_report') ? '' : 'collapsed'}`}
-                                to="/admin/manage_tracking_report" // Use 'to' instead of 'href'
-                            >
-                                <i className="bx bxs-map"></i>
-                                <span>Tracking Report</span>
+                                <i className="bi bi-briefcase-fill"></i>
+                                <span>Transactions</span>
                             </Link>
                         </li>
+                        
+                        <li className="nav-item">
+                            <Link
+                                className={`nav-link ${isActive('/admin/reports') ? '' : 'collapsed'}`}
+                                id="dashboard"
+                                to="/admin/dashboard" // Use 'to' instead of 'href'
+                            >
+                                <i className="bi bi-reception-4"></i>
+                                <span>Reports and Statistics</span>
+                            </Link>
+                        </li> 
 
                         <hr />
                         <li className="nav-heading">CONFIGURATION</li>
 
+                        <li className="nav-item">
+                            <Link
+                                className={`nav-link ${isActive('/admin/manage_user_accounts') ? '' : 'collapsed'}`}
+                                id="dashboard"
+                                to="/admin/dashboard" // Use 'to' instead of 'href'
+                            >
+                                <i className="bi bi-people-fill"></i>
+                                <span>Manage User Accounts</span>
+                            </Link>
+                        </li> 
                          
                     </ul>
                 </aside>
