@@ -140,6 +140,62 @@ app.post("/login", (req, res) => {
             res.json({ message: "Login successful", account_id: user.account_id });
         });
     });
+});  
+
+app.post("/insert_hospital_bill", (req, res) => {
+    const { 
+        patientFirstName, patientMiddleName, patientLastName, patientExtName, patientAddress, patientHospital,
+        claimantFirstname, claimantMiddlename, claimantLastname, claimantExtName, claimantRelationship, claimantContact, claimantAmount 
+    } = req.body;    
+ 
+    console.log("Received Data:", patientFirstName);
+ 
+    const sanitizedHospital = patientHospital && patientHospital.trim() !== "" ? patientHospital : null;
+ 
+    const currentDateTime = new Date().toISOString().slice(0, 19).replace("T", " ");
+
+    const insertHospitalBillQuery = `
+        INSERT INTO hospital_bill
+        (patient_fname, patient_mname, patient_lname, patient_ext_name, patient_address, patient_hospital, 
+        claimant_fname, claimant_mname, claimant_lname, claimant_extname, claimant_relationship, claimant_contact, 
+        claimant_amount, datetime_added) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.beginTransaction((err) => {
+        if (err) {
+            console.error("Transaction Error:", err);
+            return res.status(500).json({ error: "Transaction initialization failed." });
+        }
+ 
+        db.query(insertHospitalBillQuery, [
+            patientFirstName, patientMiddleName, patientLastName, patientExtName, patientAddress, sanitizedHospital,
+            claimantFirstname, claimantMiddlename, claimantLastname, claimantExtName, claimantRelationship, claimantContact, 
+            claimantAmount, currentDateTime
+        ], (err, result) => {        
+            if (err) {
+                console.error("Hospital Bill Insertion Error:", err.sqlMessage || err);
+                return db.rollback(() => res.status(500).json({ error: "Failed to insert hospital bill." }));
+            }
+
+            // Commit the transaction
+            db.commit((err) => {
+                if (err) {
+                    console.error("Transaction Commit Error:", err);
+                    return db.rollback(() => res.status(500).json({ error: "Transaction commit failed." }));
+                }
+
+                res.json({ message: "Hospital bill inserted successfully!", bill_id: result.insertId });
+            });
+        });
+    });
+}); 
+ 
+app.get("/retrieve_hospital_bill", (req, res) => {
+    db.query("SELECT * FROM hospital_bill", (err, results) => {
+        if (err) return res.status(500).json({ error: err });
+        res.json(results);
+    });
 });
 
 app.listen(process.env.VITE_FIREBASE_PORT, () => console.log(`Server running on port ${process.env.VITE_FIREBASE_PORT}`));

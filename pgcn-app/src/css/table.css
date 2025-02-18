@@ -1,6 +1,6 @@
 /* Table Header Background Color */
 .table-custom thead th {
-    background-color: #f0f8ff;
+    background-color: #84ecc5;
     /* Light green background for header */
     font-size: 14px;
     text-align: center;
@@ -68,9 +68,10 @@
 
 /* Table Data Cells (td) */
 .table-custom td {
-    font-family: 'Arial', sans-serif;
+    /* font-family: 'Arial', sans-serif; */
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
     color: #555555;
-    font-size: 13px;
+    font-size: 14px;
     text-align: center;
     font-weight: 500;
     vertical-align: middle;
@@ -114,7 +115,7 @@
 /* Input Field Style */
 .form-control {
     font-size: 14px;
-    background-color: #f0f8ff;
+    background-color: #f0f8ff88;
     outline: 1px solid rgb(245, 245, 245);
     color: #000000;
 }

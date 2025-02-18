@@ -29,6 +29,20 @@ function Sidebar({ isVisible }) {
                             </Link>
                         </li>
                         
+                        <hr />
+                        <li className="nav-heading">MANAGE TRANSACTIONS</li>
+
+                        <li className="nav-item">
+                            <Link
+                                className={`nav-link ${isActive('/admin/hospital_bill') ? '' : 'collapsed'}`}
+                                id="dashboard"
+                                to="/admin/hospital_bill" // Use 'to' instead of 'href'
+                            >
+                                <i className="bi bi-briefcase-fill"></i>
+                                <span>Hospital Bill</span>
+                            </Link>
+                        </li>
+                        
                         <li className="nav-item">
                             <Link
                                 className={`nav-link ${isActive('/admin/transactions') ? '' : 'collapsed'}`}
@@ -36,10 +50,13 @@ function Sidebar({ isVisible }) {
                                 to="/admin/dashboard" // Use 'to' instead of 'href'
                             >
                                 <i className="bi bi-briefcase-fill"></i>
-                                <span>Transactions</span>
+                                <span>Burial Assistance</span>
                             </Link>
-                        </li>
+                        </li> 
                         
+                        <hr />
+                        <li className="nav-heading">REPORTS</li>
+
                         <li className="nav-item">
                             <Link
                                 className={`nav-link ${isActive('/admin/reports') ? '' : 'collapsed'}`}

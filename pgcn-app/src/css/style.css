@@ -280,11 +280,13 @@ body.sidebar-hidden #main {
 /* Close Button */
 .btn-close {
   background-size: 25%;
+  border-radius: 3px;
 }
 
 .btn-close:focus {
   outline: 0;
   box-shadow: none;
+  border-radius: 3px;
 }
 
 /* Accordion */
@@ -408,6 +410,7 @@ body.sidebar-hidden #main {
   padding-left: 10px;
   cursor: pointer;
   color: #08533F;
+  border-radius: 3px;
 }
 
 .header .search-bar {
@@ -933,18 +936,21 @@ hr {
   background-color: #56AA49 !important;
   color: white !important;
   margin-right: 5px;
+  border-radius: 3px;
 }
 
 .btn-pending {
   background-color: #3ba1c5 !important;
   color: white !important;
   margin-right: 5px;
+  border-radius: 3px;
 }
 
 .btn-deactivate {
   background-color: #dc3545 !important;
   color: white !important;
   margin-right: 5px;
+  border-radius: 3px;
 }
 
 .dashboard .activity .activity-item .activity-content {
