@@ -2,10 +2,12 @@ require("dotenv").config();
 const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
+const session = require("express-session");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const db = mysql.createConnection({
     host: process.env.VITE_FIREBASE_DB_HOST,
@@ -21,6 +23,24 @@ db.connect(err => {
     }
     console.log("Connected to MySQL database.");
 });
+  
+app.use(
+    cors({
+        origin: "http://localhost:5173", // Allow only your frontend
+        credentials: true, // Allow cookies & sessions
+    })
+);
+ 
+app.use(session({
+    secret: process.env.VITE_FIREBASE_SESSION_KEY,
+    resave: false, 
+    saveUninitialized: false,
+    cookie: {
+        secure: false, // Set `true` if using HTTPS
+        httpOnly: true, 
+        sameSite: "lax" // Adjust if cross-site requests are needed
+    }
+})); 
 
 app.get("/accounts", (req, res) => {
     db.query("SELECT * FROM accounts", (err, results) => {
@@ -136,19 +156,60 @@ app.post("/login", (req, res) => {
                 return res.status(400).json({ error: "Invalid email or password." });
             }
 
-            // If email and password are correct, you can return a success message or generate a token (e.g., JWT)
-            res.json({ message: "Login successful", account_id: user.account_id });
+            // Store user details in session
+            req.session.user = { account_id: user.account_id, email: user.email };
+
+            // Force save the session
+            /* req.session.save((err) => {
+                if (err) {
+                    console.error("Session Save Error:", err);
+                    return res.status(500).json({ error: "Session not saved properly." });
+                }
+                console.log("Session Created:", req.session.user);
+                res.json({ message: "Login successful", account_id: user.account_id });
+            }); */
+
+            /* res.json({ loggedIn: true, user: req.session.user }); */
+
+            // Console log session details
+            console.log("Session Created:", req.session.user);
+
+            res.json({ message: "Login successful", account_id: user.account_id, email: user.email });
         });
     });
-});  
+});
+
+app.get("/session", (req, res) => {
+    if (req.session.user) {
+        console.log("Active Session:", req.session); // Log full session data
+        res.json({ loggedIn: true, user: req.session.user });
+    } else {
+        console.log("No active session");
+        res.json({ loggedIn: false });
+    }
+});
+
+// Logout
+app.post("/logout", (req, res) => {
+    if (!req.session) {
+        return res.status(400).json({ error: "No active session" });
+    }
+    
+    req.session.destroy((err) => {
+        if (err) {
+            console.error("Session destruction error:", err);
+            return res.status(500).json({ error: "Logout failed" });
+        }
+        res.json({ message: "Logged out successfully" });
+    });
+});
+
 
 app.post("/insert_hospital_bill", (req, res) => {
     const { 
         patientFirstName, patientMiddleName, patientLastName, patientExtName, patientAddress, patientHospital,
         claimantFirstname, claimantMiddlename, claimantLastname, claimantExtName, claimantRelationship, claimantContact, claimantAmount 
-    } = req.body;    
- 
-    console.log("Received Data:", patientFirstName);
+    } = req.body;     
  
     const sanitizedHospital = patientHospital && patientHospital.trim() !== "" ? patientHospital : null;
  
@@ -190,11 +251,108 @@ app.post("/insert_hospital_bill", (req, res) => {
         });
     });
 }); 
+
+app.post("/update_hospital_bill", (req, res) => {
+    const { 
+        billId, // Assuming the billId is passed to identify the bill to update
+        patientFirstName, patientMiddleName, patientLastName, patientExtName, patientAddress, patientHospital,
+        claimantFirstname, claimantMiddlename, claimantLastname, claimantExtName, claimantRelationship, claimantContact, claimantAmount 
+    } = req.body;     
+
+    const sanitizedHospital = patientHospital && patientHospital.trim() !== "" ? patientHospital : null;
+
+    // Getting current date and time
+    const currentDateTime = new Date().toISOString().slice(0, 19).replace("T", " ");
+
+    // SQL query for updating the hospital bill
+    const updateHospitalBillQuery = `
+        UPDATE hospital_bill
+        SET 
+            patient_fname = ?, 
+            patient_mname = ?, 
+            patient_lname = ?, 
+            patient_ext_name = ?, 
+            patient_address = ?, 
+            patient_hospital = ?, 
+            claimant_fname = ?, 
+            claimant_mname = ?, 
+            claimant_lname = ?, 
+            claimant_extname = ?, 
+            claimant_relationship = ?, 
+            claimant_contact = ?, 
+            claimant_amount = ?, 
+            datetime_added = ?
+        WHERE hospital_bill_id = ?; `;
+
+    // Begin a database transaction
+    db.beginTransaction((err) => {
+        if (err) {
+            console.error("Transaction Error:", err);
+            return res.status(500).json({ error: "Transaction initialization failed." });
+        }
+
+        // Run the update query
+        db.query(updateHospitalBillQuery, [
+            patientFirstName, patientMiddleName, patientLastName, patientExtName, patientAddress, sanitizedHospital,
+            claimantFirstname, claimantMiddlename, claimantLastname, claimantExtName, claimantRelationship, claimantContact, 
+            claimantAmount, currentDateTime, billId // Pass the `billId` to identify the record to update
+        ], (err, result) => {
+            if (err) {
+                console.error("Hospital Bill Update Error:", err.sqlMessage || err);
+                return db.rollback(() => res.status(500).json({ error: "Failed to update hospital bill." }));
+            }
+
+            // Commit the transaction
+            db.commit((err) => {
+                if (err) {
+                    console.error("Transaction Commit Error:", err);
+                    return db.rollback(() => res.status(500).json({ error: "Transaction commit failed." }));
+                }
+
+                if (result.affectedRows === 0) {
+                    // If no rows were affected, it means the record with the provided `billId` was not found
+                    return res.status(404).json({ error: "Hospital bill not found for update." });
+                }
+
+                res.json({ message: "Hospital bill updated successfully!", bill_id: billId });
+            });
+        });
+    });
+}); 
  
 app.get("/retrieve_hospital_bill", (req, res) => {
     db.query("SELECT * FROM hospital_bill", (err, results) => {
         if (err) return res.status(500).json({ error: err });
         res.json(results);
+    });
+});
+
+app.post("/delete_hospital_bill", (req, res) => {
+    const { billId } = req.body;
+ 
+
+    // Ensure that billId is provided
+    if (!billId) {
+        return res.status(400).json({ error: "billId is required." });
+    }
+
+    // SQL query to delete the hospital bill by billId
+    const deleteHospitalBillQuery = "DELETE FROM hospital_bill WHERE hospital_bill_id = ?";
+
+    // Execute the DELETE query
+    db.query(deleteHospitalBillQuery, [billId], (err, results) => {
+        if (err) {
+            console.error("Database Error:", err);
+            return res.status(500).json({ error: "Internal server error." });
+        }
+
+        // If no rows were affected, it means no record with the given billId was found
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ error: "Hospital bill not found." });
+        }
+
+        // Successfully deleted the hospital bill
+        res.json({ message: "Hospital bill deleted successfully!" });
     });
 });
 

@@ -1,14 +1,65 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom'; 
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function Sidebar({ isVisible }) { 
-
+    const navigate = useNavigate(); // Use navigate for redirection 
 
     const location = useLocation(); // Get the current location (URL)
 
     // Helper function to check if the current location matches the given path
     const isActive = (path) => location.pathname === path;
+
+
+    const handleLogout = async () => {
+        // Get the current user from localStorage
+        const user = JSON.parse(localStorage.getItem("user"));
+    
+        if (user && user.email) {
+            console.log("Logging out user:", user.email);
+        } else {
+            console.log("No user found in localStorage");
+        }
+    
+        try {
+            // Send logout request to the server
+            await axios.post("http://localhost:5000/logout");
+            console.log("Server session destroyed");
+    
+            // Remove user data from localStorage
+            localStorage.removeItem("user");
+    
+            // Confirm logout in the console
+            console.log("User logged out:", localStorage.getItem("user") === null ? "Success" : "Failed");
+    
+            // Redirect to login page
+            navigate("/");
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
+    };
+ 
+    
+    useEffect(() => {
+        // Get user from localStorage
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            console.log("Stored User:", JSON.parse(storedUser));
+        }
+    
+        // Fetch user session from backend
+        fetch("http://localhost:5000/session", { credentials: "include" }) // Ensure cookies are sent
+            .then((res) => res.json())
+            .then((data) => {
+                console.log("Session Data:", data);
+            })
+            .catch((err) => console.error("Error fetching session:", err));
+    }, []);
+ 
+
+    
 
     return (
         <>
@@ -81,7 +132,30 @@ function Sidebar({ isVisible }) {
                                 <span>Manage User Accounts</span>
                             </Link>
                         </li> 
-                         
+                        <hr />
+                        {/* <li className="nav-item">
+                            <Link
+                                className={`nav-link ${isActive('/admin/manage_user_accounts') ? '' : 'collapsed'}`}
+                                id="dashboard" 
+                            >
+                                <i className="bi bi-box-arrow-right"></i>
+                                <span>Logout</span>
+                            </Link>
+                        </li>  */}
+
+                        <li className="nav-item">
+                            <Link 
+                                className="nav-link" 
+                                onClick={handleLogout} 
+                                style={{ border: "none", background: "none", cursor: "pointer" }}
+                            >
+                                <i className="bi bi-box-arrow-right"></i>
+                                <span>Logout</span>
+                            </Link>
+                        </li>
+
+
+
                     </ul>
                 </aside>
             )}

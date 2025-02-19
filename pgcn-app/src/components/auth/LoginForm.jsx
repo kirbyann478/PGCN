@@ -60,7 +60,7 @@ function LoginForm() {
             });
     
             // Optionally, store user data (e.g., token) in localStorage or context
-            // localStorage.setItem("user", JSON.stringify(data));
+            localStorage.setItem("user", JSON.stringify(data));
             
             // Redirect user after successful login (adjust according to your app structure)
             setTimeout(() => navigate('/admin/dashboard'), 2000); // Navigate to a protected route like '/dashboard'
@@ -77,6 +77,24 @@ function LoginForm() {
             });
         }
     };
+
+    
+    useEffect(() => {
+        // Get user from localStorage
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            console.log("Stored User:", JSON.parse(storedUser));
+        }
+    
+        // Fetch user session from backend
+        fetch("http://localhost:5000/session", { credentials: "include" }) // Ensure cookies are sent
+            .then((res) => res.json())
+            .then((data) => {
+                console.log("Session Data:", data);
+            })
+            .catch((err) => console.error("Error fetching session:", err));
+    }, []);
+    
     
     
 
@@ -89,8 +107,8 @@ function LoginForm() {
                         <div className="row">
                             <div className="col-md-6 " >
                                 <div className="caption_container">
-                                    <img src='assets/img/authbg/ambulance.gif'
-                                        className='ambulance_gif' />
+                                    {/* <img src='assets/img/authbg/ambulance.gif'
+                                        className='ambulance_gif' /> */}
 
                                     <h2 className="title">PGCN</h2>
                                     <p className="subtitle">Real-Time Ambulance Patient Information Dissemination: An Application for Immediate Ambulance to Hospital Patient Data and Incident Report Transmission</p>

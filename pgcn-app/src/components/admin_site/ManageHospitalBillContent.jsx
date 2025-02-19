@@ -5,7 +5,9 @@ import { Modal, Button, Form } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css'; 
 
 function ManageHospitalBillContent(){
-    
+
+    // Variables for inputs ------------------------------------------------------------
+    const [billId, setHospitalId] = useState('');
     const [patientFirstName, setPatientFirstName] = useState('');
     const [patientMiddleName, setPatientMiddleName] = useState('');
     const [patientLastName, setPatientLastName] = useState('');
@@ -20,16 +22,21 @@ function ManageHospitalBillContent(){
     const [claimantRelationship, setClaimantRelationship] = useState('');
     const [claimantContact, setClaimantContact] = useState('');
     const [claimantAmount, setClaimantAmount] = useState('');
+    // Variables for inputs ------------------------------------------------------------
 
+    // Variables for hospital bills -------------------------------
     const [hospitalBills, setHospitalBills] = useState([]);
+    // Variables for hospital bills -------------------------------
 
+    // Variables for pagination -------------------------------
     const [currentPage, setCurrentPage] = useState(1);
     const recordsPerPage = 10;
 
     const [selectedBill, setSelectedBill] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
-
+    const [modalName, setModalName] = useState();
+    // Variables for pagination -------------------------------
 
     const handleAddHospitalBill = async (e) => {
         e.preventDefault();
@@ -66,20 +73,100 @@ function ManageHospitalBillContent(){
                 text: "Hospital bill has been recorded successfully!",
             });
     
-            // ✅ Reset all input fields after successful save
-            setPatientFirstName('');
-            setPatientMiddleName('');
-            setPatientLastName('');
-            setPatientExtName('');
-            setPatientAddress('');
-            setPatientHospital('');
-            setClaimantFname('');
-            setClaimantMname('');
-            setClaimantLname('');
-            setClaimantExtName('');
-            setClaimantRelationship('');
-            setClaimantContact('');
-            setClaimantAmount('');
+            ResetForms();
+    
+        } catch (err) {
+            console.error("Error:", err.message);
+            Swal.fire({
+                icon: "error",
+                title: "Transaction Failed",
+                text: err.message || "An error occurred while saving the hospital bill.",
+            });
+        }
+    }; 
+
+    const handleDeleteHospitalBill = async (e, billId) => {
+        e.preventDefault();
+    
+        console.log("Testtt", billId); // Ensure billId is being passed correctly
+    
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This will delete the hospital bill record permanently!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'No, cancel!'
+        }).then(async (swalResult) => {
+            if (swalResult.isConfirmed) {
+                try {
+                    // Sending DELETE request to the backend
+                    const response = await fetch('http://localhost:5000/delete_hospital_bill', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ billId }) // Send the billId to the server
+                    });
+    
+                    const serverResult = await response.json(); // Renamed result to serverResult
+    
+                    if (response.ok) { 
+                        Swal.fire('Deleted!', serverResult.message, 'success'); // Success message 
+                    } else { 
+                        Swal.fire('Error!', serverResult.error, 'error');  
+                    }
+                } catch (error) {
+                    console.error("Error deleting hospital bill:", error);
+                    Swal.fire('Error!', 'An error occurred while deleting the bill.', 'error');
+                }
+            } else {
+                // If canceled
+                Swal.fire('Cancelled', 'The hospital bill was not deleted.', 'info');
+            }
+        });
+    };
+    
+    
+
+    const handleUpdateHospitalBill = async (e) => {
+        e.preventDefault();
+    
+        // Get current date-time in yyyy-mm-dd HH:mm:ss format
+        const currentDateTime = new Date().toISOString().slice(0, 19).replace("T", " ");
+    
+        console.log("Submitting hospital bill with data:", {
+            billId,
+            patientFirstName, patientMiddleName, patientLastName, patientExtName, patientAddress, patientHospital,
+            claimantFirstname, claimantMiddlename, claimantLastname, claimantExtName, claimantRelationship, claimantContact,
+            claimantAmount, currentDateTime
+        });
+    
+        try {
+            const response = await fetch("http://localhost:5000/update_hospital_bill", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    billId,
+                    patientFirstName, patientMiddleName, patientLastName, patientExtName, patientAddress, patientHospital,
+                    claimantFirstname, claimantMiddlename, claimantLastname, claimantExtName, claimantRelationship, claimantContact,
+                    claimantAmount, currentDateTime
+                })                
+            });
+    
+            const data = await response.json();
+    
+            if (!response.ok) {
+                throw new Error(data.error || "Failed to insert hospital bill.");
+            }
+    
+            Swal.fire({
+                icon: "success",
+                title: "Transaction Successful",
+                text: "Hospital bill has been updated successfully!",
+            }); 
     
         } catch (err) {
             console.error("Error:", err.message);
@@ -102,9 +189,14 @@ function ManageHospitalBillContent(){
         }
     };
 
+    // Handle any real-time updates (for example, using WebSockets or polling)
     useEffect(() => {
-        fetchHospitalBills();
-    }, []);
+        const interval = setInterval(() => {
+            fetchHospitalBills(); // Refresh the records periodically
+        }, 2000); // Refresh every 5 seconds (you can adjust the time)
+
+        return () => clearInterval(interval); // Cleanup interval when the component unmounts
+    }, []); 
 
     // Pagination Logic
     const indexOfLastRecord = currentPage * recordsPerPage;
@@ -113,26 +205,55 @@ function ManageHospitalBillContent(){
     const totalPages = Math.ceil(hospitalBills.length / recordsPerPage);
 
     // Open modal and set selected bill
-    const handleOpenModal = (bill, editMode = false) => {
+    const handleOpenModal = (bill, editMode = false, modalName) => {
         setSelectedBill(bill);
         setIsEditMode(editMode);
+        setModalName(modalName);
+        PopulateForms(bill);
 
-        console.log(bill, 'ahahha')
-        
-        setPatientFirstName(bill.patientFirstName);
-        setPatientMiddleName(bill.patientMiddleName);
-        setPatientLastName(bill.patientLastName);
-        setPatientExtName(bill.patientExtName);
-        setPatientAddress(bill.patientAddress);
-        setPatientHospital(bill.patientHospital);
-        setClaimantFname(bill.claimantFirstname);
-        setClaimantMname(bill.claimantMiddlename);
-        setClaimantLname(bill.claimantLastname);
-        setClaimantExtName(bill.claimantExtName);
-        setClaimantRelationship(bill.claimantRelationship);
-        setClaimantContact(bill.claimantContact);
-        setClaimantAmount(bill.claimantAmount);
+        console.log("ID:", bill['hospital_bill_id'])
     };
+ 
+    const handleAddRecord = (editMode = false, modalName) => { 
+        ResetForms();
+        setIsEditMode(editMode);
+        setModalName(modalName)  
+    };
+
+    const PopulateForms = (bill) => {
+        setHospitalId(bill['hospital_bill_id']);
+        setPatientFirstName(bill['patient_fname']);
+        setPatientMiddleName(bill['patient_mname']);
+        setPatientLastName(bill['patient_lname']);
+        setPatientExtName(bill['patient_ext_name']);
+        setPatientAddress(bill['patient_address']);
+        setPatientHospital(bill['patient_hospital']);
+        setClaimantFname(bill['claimant_fname']);
+        setClaimantMname(bill['claimant_mname']);
+        setClaimantLname(bill['claimant_lname']);
+        setClaimantExtName(bill['claimant_extname']);
+        setClaimantRelationship(bill['claimant_relationship']);
+        setClaimantContact(bill['claimant_contact']);
+        setClaimantAmount(bill['claimant_amount']); 
+    }
+
+    const ResetForms = () => {
+        // ✅ Reset all input fields after successful save
+        setPatientFirstName('');
+        setPatientMiddleName('');
+        setPatientLastName('');
+        setPatientExtName('');
+        setPatientAddress('');
+        setPatientHospital('');
+        setClaimantFname('');
+        setClaimantMname('');
+        setClaimantLname('');
+        setClaimantExtName('');
+        setClaimantRelationship('');
+        setClaimantContact('');
+        setClaimantAmount('');
+        
+    } 
 
     return(
         <>
@@ -184,7 +305,8 @@ function ManageHospitalBillContent(){
                                                                 <button
                                                                     className="btn btn-primary btn-sm"
                                                                     data-bs-toggle="modal"
-                                                                    data-bs-target="#addHospitalBillModal" 
+                                                                    data-bs-target="#addHospitalBillModal"  
+                                                                    onClick={() => handleAddRecord(true, "Add")}
                                                                 >
                                                                     + Add Hospital Bil
                                                                 </button>
@@ -214,15 +336,18 @@ function ManageHospitalBillContent(){
                                                                             <td>{bill.claimant_contact}</td>
                                                                             <td>{new Date(bill.datetime_added).toLocaleString()}</td>
                                                                             <td>
-                                                                                <button className="btn btn-success" onClick={() => handleOpenModal(bill, false)}
+                                                                                <button className="btn btn-success" onClick={() => handleOpenModal(bill, true, "View")}
                                                                                     data-bs-toggle="modal"
                                                                                     data-bs-target="#addHospitalBillModal">
                                                                                     <i className="bi bi-eye"></i> View
                                                                                 </button>
-                                                                                <button className="btn btn-primary" onClick={() => handleOpenModal(bill, true)}>
+                                                                                <button className="btn btn-primary" onClick={() => handleOpenModal(bill, true, "Edit")}
+                                                                                    data-bs-toggle="modal"
+                                                                                    data-bs-target="#addHospitalBillModal">
                                                                                     <i className="bi bi-pencil"></i> Edit
                                                                                 </button>
-                                                                                <button className="btn btn-danger">
+                                                                                <button className="btn btn-danger" 
+                                                                                    onClick={(e) => handleDeleteHospitalBill(e, bill['hospital_bill_id'])} >
                                                                                     <i className="bi bi-trash3"></i> Delete
                                                                                 </button>
                                                                             </td>
@@ -284,7 +409,7 @@ function ManageHospitalBillContent(){
                             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div className="modal-body">
-                            <form onSubmit={handleAddHospitalBill}>
+                            <form>
                                  
                                 <h3>Patient Information</h3><br />
                                 <div className="row"> 
@@ -474,9 +599,24 @@ function ManageHospitalBillContent(){
                                     <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
                                         Close
                                     </button>
-                                    <button type="submit" className="btn btn-primary">
-                                        Save
-                                    </button>
+
+                                    { modalName == "Add" && 
+                                        <>
+                                            <button type="submit" className="btn btn-primary"
+                                            onClick={handleAddHospitalBill}>
+                                                Save
+                                            </button> 
+                                        </>
+                                    }
+
+                                    { modalName == "Edit" && 
+                                        <>
+                                            <button type="submit" className="btn btn-primary"
+                                            onClick={handleUpdateHospitalBill}>
+                                                Save
+                                            </button> 
+                                        </>
+                                    }
                                 </div>
                             </form>
                         </div>
