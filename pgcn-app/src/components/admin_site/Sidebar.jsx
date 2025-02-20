@@ -25,7 +25,7 @@ function Sidebar({ isVisible }) {
     
         try {
             // Send logout request to the server
-            await axios.post("http://localhost:5000/logout");
+            await axios.post("http://192.168.1.248:5000/logout");
             console.log("Server session destroyed");
     
             // Remove user data from localStorage
@@ -50,12 +50,12 @@ function Sidebar({ isVisible }) {
         }
     
         // Fetch user session from backend
-        fetch("http://localhost:5000/session", { credentials: "include" }) // Ensure cookies are sent
+        /* fetch("http://localhost:5000/session", { credentials: "include" })  
             .then((res) => res.json())
             .then((data) => {
                 console.log("Session Data:", data);
             })
-            .catch((err) => console.error("Error fetching session:", err));
+            .catch((err) => console.error("Error fetching session:", err)); */
     }, []);
  
 
@@ -110,9 +110,9 @@ function Sidebar({ isVisible }) {
 
                         <li className="nav-item">
                             <Link
-                                className={`nav-link ${isActive('/admin/reports') ? '' : 'collapsed'}`}
+                                className={`nav-link ${isActive('/admin/manage_report') ? '' : 'collapsed'}`}
                                 id="dashboard"
-                                to="/admin/dashboard" // Use 'to' instead of 'href'
+                                to="/admin/manage_report" // Use 'to' instead of 'href'
                             >
                                 <i className="bi bi-reception-4"></i>
                                 <span>Reports and Statistics</span>
@@ -132,16 +132,7 @@ function Sidebar({ isVisible }) {
                                 <span>Manage User Accounts</span>
                             </Link>
                         </li> 
-                        <hr />
-                        {/* <li className="nav-item">
-                            <Link
-                                className={`nav-link ${isActive('/admin/manage_user_accounts') ? '' : 'collapsed'}`}
-                                id="dashboard" 
-                            >
-                                <i className="bi bi-box-arrow-right"></i>
-                                <span>Logout</span>
-                            </Link>
-                        </li>  */}
+                        <hr /> 
 
                         <li className="nav-item">
                             <Link 

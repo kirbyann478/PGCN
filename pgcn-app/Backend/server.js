@@ -10,10 +10,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const db = mysql.createConnection({
-    host: process.env.VITE_FIREBASE_DB_HOST,
-    user: process.env.VITE_FIREBASE_DB_USER,
-    password: process.env.VITE_FIREBASE_DB_PASSWORD,
-    database: process.env.VITE_FIREBASE_DB_NAME,
+    host: process.env.VITE_DB_HOST,
+    user: process.env.VITE_DB_USER,
+    password: process.env.VITE_DB_PASSWORD,
+    database: process.env.VITE_DB_NAME,
 });
 
 db.connect(err => {
@@ -26,13 +26,13 @@ db.connect(err => {
   
 app.use(
     cors({
-        origin: "http://localhost:5173", // Allow only your frontend
+        origin: "http://192.168.1.248:5173", // Allow only your frontend
         credentials: true, // Allow cookies & sessions
     })
 );
  
 app.use(session({
-    secret: process.env.VITE_FIREBASE_SESSION_KEY,
+    secret: process.env.VITE_SESSION_KEY,
     resave: false, 
     saveUninitialized: false,
     cookie: {
@@ -356,4 +356,4 @@ app.post("/delete_hospital_bill", (req, res) => {
     });
 });
 
-app.listen(process.env.VITE_FIREBASE_PORT, () => console.log(`Server running on port ${process.env.VITE_FIREBASE_PORT}`));
+app.listen(process.env.VITE_PORT, () => console.log(`Server running on port ${process.env.VITE_PORT}`));

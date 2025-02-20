@@ -51,7 +51,7 @@ function ManageHospitalBillContent(){
         });
     
         try {
-            const response = await fetch("http://localhost:5000/insert_hospital_bill", {
+            const response = await fetch("http://192.168.1.248:5000/insert_hospital_bill", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -103,7 +103,7 @@ function ManageHospitalBillContent(){
             if (swalResult.isConfirmed) {
                 try {
                     // Sending DELETE request to the backend
-                    const response = await fetch('http://localhost:5000/delete_hospital_bill', {
+                    const response = await fetch('http://192.168.1.248:5000/delete_hospital_bill', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -145,7 +145,7 @@ function ManageHospitalBillContent(){
         });
     
         try {
-            const response = await fetch("http://localhost:5000/update_hospital_bill", {
+            const response = await fetch("http://192.168.1.248:5000/update_hospital_bill", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -180,7 +180,7 @@ function ManageHospitalBillContent(){
 
     const fetchHospitalBills = async () => {
         try {
-            const response = await fetch("http://localhost:5000/retrieve_hospital_bill");
+            const response = await fetch("http://192.168.1.248:5000/retrieve_hospital_bill");
             const data = await response.json();
             setHospitalBills(data);
  

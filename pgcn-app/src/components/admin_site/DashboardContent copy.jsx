@@ -4,7 +4,7 @@ function DashboardContent(){
     const [users, setUsers] = useState([]);
 
     useEffect(() => {
-        fetch("http://localhost:5000/accounts")
+        fetch("http://192.168.1.248:5000/accounts")
             .then(response => response.json())
             .then(data => {
                 console.log("Fetched data:", data); // ✅ Log the data

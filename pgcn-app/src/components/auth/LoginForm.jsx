@@ -34,7 +34,7 @@ function LoginForm() {
         }
     
         try {
-            const response = await fetch("http://localhost:5000/login", {
+            const response = await fetch("http://192.168.1.248:5000/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -84,10 +84,14 @@ function LoginForm() {
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
             console.log("Stored User:", JSON.parse(storedUser));
+             
+            navigate("/admin/dashboard");
+        } else {
+            navigate("/");
         }
     
         // Fetch user session from backend
-        fetch("http://localhost:5000/session", { credentials: "include" }) // Ensure cookies are sent
+        fetch("http://192.168.1.248:5000/session", { credentials: "include" }) // Ensure cookies are sent
             .then((res) => res.json())
             .then((data) => {
                 console.log("Session Data:", data);
