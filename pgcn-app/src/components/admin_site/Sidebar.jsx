@@ -47,15 +47,7 @@ function Sidebar({ isVisible }) {
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
             console.log("Stored User:", JSON.parse(storedUser));
-        }
-    
-        // Fetch user session from backend
-        /* fetch("http://localhost:5000/session", { credentials: "include" })  
-            .then((res) => res.json())
-            .then((data) => {
-                console.log("Session Data:", data);
-            })
-            .catch((err) => console.error("Error fetching session:", err)); */
+        } 
     }, []);
  
 

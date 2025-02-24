@@ -1123,4 +1123,32 @@ hr {
 #searchSuggestions2 li:hover {
   background-color: #f5f5f5;
 }
- 
+
+.generateContainer{
+  outline: 1px solid rgba(202, 202, 202, 0.226);
+  padding: 16px;
+  border-radius: 3px;
+  margin-bottom: 20px;
+}
+
+.seal_logo_container{
+  width: 100px;
+  height: 100px;
+}
+
+.header_form{
+  font-weight: 500;
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  margin-top: 20px;
+}
+
+
+.body_form{
+  font-weight: 500;
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  margin-top: 20px;  
+}
+
+.body_form .body_container{ 
+  margin-left: 50px;
+}

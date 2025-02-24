@@ -207,20 +207,22 @@ app.post("/logout", (req, res) => {
 
 app.post("/insert_hospital_bill", (req, res) => {
     const { 
-        patientFirstName, patientMiddleName, patientLastName, patientExtName, patientAddress, patientHospital,
+        account_id, // Fixed variable name (was localUserId)
+        patientFirstName, patientMiddleName, patientLastName, patientExtName, 
+        patientPurok, patientBarangay, patientMunicipality, patientProvince, patientHospital,
         claimantFirstname, claimantMiddlename, claimantLastname, claimantExtName, claimantRelationship, claimantContact, claimantAmount 
     } = req.body;     
  
     const sanitizedHospital = patientHospital && patientHospital.trim() !== "" ? patientHospital : null;
- 
     const currentDateTime = new Date().toISOString().slice(0, 19).replace("T", " ");
 
     const insertHospitalBillQuery = `
         INSERT INTO hospital_bill
-        (patient_fname, patient_mname, patient_lname, patient_ext_name, patient_address, patient_hospital, 
-        claimant_fname, claimant_mname, claimant_lname, claimant_extname, claimant_relationship, claimant_contact, 
+        (account_id, patient_fname, patient_mname, patient_lname, patient_ext_name, 
+        patient_purok, patient_barangay, patient_municipality, patient_province, 
+        patient_hospital, claimant_fname, claimant_mname, claimant_lname, claimant_extname, claimant_relationship, claimant_contact, 
         claimant_amount, datetime_added) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     db.beginTransaction((err) => {
@@ -230,7 +232,9 @@ app.post("/insert_hospital_bill", (req, res) => {
         }
  
         db.query(insertHospitalBillQuery, [
-            patientFirstName, patientMiddleName, patientLastName, patientExtName, patientAddress, sanitizedHospital,
+            account_id, // Fixed here
+            patientFirstName, patientMiddleName, patientLastName, patientExtName,
+            patientPurok, patientBarangay, patientMunicipality, patientProvince, patientHospital,
             claimantFirstname, claimantMiddlename, claimantLastname, claimantExtName, claimantRelationship, claimantContact, 
             claimantAmount, currentDateTime
         ], (err, result) => {        
@@ -239,7 +243,6 @@ app.post("/insert_hospital_bill", (req, res) => {
                 return db.rollback(() => res.status(500).json({ error: "Failed to insert hospital bill." }));
             }
 
-            // Commit the transaction
             db.commit((err) => {
                 if (err) {
                     console.error("Transaction Commit Error:", err);
@@ -250,29 +253,31 @@ app.post("/insert_hospital_bill", (req, res) => {
             });
         });
     });
-}); 
+});
 
 app.post("/update_hospital_bill", (req, res) => {
     const { 
-        billId, // Assuming the billId is passed to identify the bill to update
-        patientFirstName, patientMiddleName, patientLastName, patientExtName, patientAddress, patientHospital,
+        billId, account_id, // Ensured `account_id` is extracted properly
+        patientFirstName, patientMiddleName, patientLastName, patientExtName, 
+        patientPurok, patientBarangay, patientMunicipality, patientProvince, patientHospital,
         claimantFirstname, claimantMiddlename, claimantLastname, claimantExtName, claimantRelationship, claimantContact, claimantAmount 
     } = req.body;     
 
     const sanitizedHospital = patientHospital && patientHospital.trim() !== "" ? patientHospital : null;
-
-    // Getting current date and time
     const currentDateTime = new Date().toISOString().slice(0, 19).replace("T", " ");
 
-    // SQL query for updating the hospital bill
     const updateHospitalBillQuery = `
         UPDATE hospital_bill
         SET 
+            account_id = ?, 
             patient_fname = ?, 
             patient_mname = ?, 
             patient_lname = ?, 
             patient_ext_name = ?, 
-            patient_address = ?, 
+            patient_purok = ?,
+            patient_barangay = ?,
+            patient_municipality = ?,
+            patient_province = ?, 
             patient_hospital = ?, 
             claimant_fname = ?, 
             claimant_mname = ?, 
@@ -282,27 +287,27 @@ app.post("/update_hospital_bill", (req, res) => {
             claimant_contact = ?, 
             claimant_amount = ?, 
             datetime_added = ?
-        WHERE hospital_bill_id = ?; `;
+        WHERE hospital_bill_id = ?; 
+    `;
 
-    // Begin a database transaction
     db.beginTransaction((err) => {
         if (err) {
             console.error("Transaction Error:", err);
             return res.status(500).json({ error: "Transaction initialization failed." });
         }
 
-        // Run the update query
         db.query(updateHospitalBillQuery, [
-            patientFirstName, patientMiddleName, patientLastName, patientExtName, patientAddress, sanitizedHospital,
+            account_id, // Fixed here
+            patientFirstName, patientMiddleName, patientLastName, patientExtName, 
+            patientPurok, patientBarangay, patientMunicipality, patientProvince, patientHospital,
             claimantFirstname, claimantMiddlename, claimantLastname, claimantExtName, claimantRelationship, claimantContact, 
-            claimantAmount, currentDateTime, billId // Pass the `billId` to identify the record to update
+            claimantAmount, currentDateTime, billId
         ], (err, result) => {
             if (err) {
                 console.error("Hospital Bill Update Error:", err.sqlMessage || err);
                 return db.rollback(() => res.status(500).json({ error: "Failed to update hospital bill." }));
             }
 
-            // Commit the transaction
             db.commit((err) => {
                 if (err) {
                     console.error("Transaction Commit Error:", err);
@@ -310,7 +315,6 @@ app.post("/update_hospital_bill", (req, res) => {
                 }
 
                 if (result.affectedRows === 0) {
-                    // If no rows were affected, it means the record with the provided `billId` was not found
                     return res.status(404).json({ error: "Hospital bill not found for update." });
                 }
 
@@ -318,7 +322,8 @@ app.post("/update_hospital_bill", (req, res) => {
             });
         });
     });
-}); 
+});
+
  
 app.get("/retrieve_hospital_bill", (req, res) => {
     db.query("SELECT * FROM hospital_bill", (err, results) => {

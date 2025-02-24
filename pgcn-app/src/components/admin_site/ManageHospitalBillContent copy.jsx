@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from "sweetalert2";
 import { Modal, Button, Form } from "react-bootstrap"; 
 import 'bootstrap/dist/css/bootstrap.min.css'; 
-import FetchLocalUserDetails from "./scripts/FetchLocalUser"; 
+import FetchLocalUserDetails from "./scripts/FetchLocalUser";
 
 function ManageHospitalBillContent(){
     const { localUserDetails } = FetchLocalUserDetails();
@@ -14,12 +14,8 @@ function ManageHospitalBillContent(){
     const [patientFirstName, setPatientFirstName] = useState('');
     const [patientMiddleName, setPatientMiddleName] = useState('');
     const [patientLastName, setPatientLastName] = useState('');
-    const [patientExtName, setPatientExtName] = useState('');  
-    const [patientPurok, setPatientPurok] = useState('');
-    const [patientBarangay, setPatientBarangay] = useState('');
-    const [patientMunicipality, setPatientMunicipality] = useState('');
-    const [patientProvince, setPatientProvince] = useState('Camarines Norte'); 
-    const [barangayList, setBarangayList] = useState([]);  
+    const [patientExtName, setPatientExtName] = useState('');
+    const [patientAddress, setPatientAddress] = useState('');
     const [patientHospital, setPatientHospital] = useState('');
 
     const [claimantFirstname, setClaimantFname] = useState('');
@@ -52,8 +48,7 @@ function ManageHospitalBillContent(){
         const currentDateTime = new Date().toISOString().slice(0, 19).replace("T", " ");
     
         console.log("Submitting hospital bill with data:", {
-            account_id, patientFirstName, patientMiddleName, patientLastName, patientExtName, 
-            patientPurok, patientBarangay, patientMunicipality, patientProvince, patientHospital,
+            account_id, patientFirstName, patientMiddleName, patientLastName, patientExtName, patientAddress, patientHospital,
             claimantFirstname, claimantMiddlename, claimantLastname, claimantExtName, claimantRelationship, claimantContact,
             claimantAmount, currentDateTime
         });
@@ -63,8 +58,7 @@ function ManageHospitalBillContent(){
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    account_id, patientFirstName, patientMiddleName, patientLastName, patientExtName, 
-                    patientPurok, patientBarangay, patientMunicipality, patientProvince, patientHospital,
+                    account_id, patientFirstName, patientMiddleName, patientLastName, patientExtName, patientAddress, patientHospital,
                     claimantFirstname, claimantMiddlename, claimantLastname, claimantExtName, claimantRelationship, claimantContact,
                     claimantAmount, currentDateTime
                 })                
@@ -149,8 +143,7 @@ function ManageHospitalBillContent(){
     
         console.log("Submitting hospital bill with data:", {
             billId, account_id,
-            patientFirstName, patientMiddleName, patientLastName, patientExtName, 
-            patientPurok, patientBarangay, patientMunicipality, patientProvince, patientHospital,
+            patientFirstName, patientMiddleName, patientLastName, patientExtName, patientAddress, patientHospital,
             claimantFirstname, claimantMiddlename, claimantLastname, claimantExtName, claimantRelationship, claimantContact,
             claimantAmount, currentDateTime
         });
@@ -161,8 +154,7 @@ function ManageHospitalBillContent(){
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     billId, account_id,
-                    patientFirstName, patientMiddleName, patientLastName, patientExtName, 
-                    patientPurok, patientBarangay, patientMunicipality, patientProvince, patientHospital,
+                    patientFirstName, patientMiddleName, patientLastName, patientExtName, patientAddress, patientHospital,
                     claimantFirstname, claimantMiddlename, claimantLastname, claimantExtName, claimantRelationship, claimantContact,
                     claimantAmount, currentDateTime
                 })                
@@ -221,54 +213,41 @@ function ManageHospitalBillContent(){
         setSelectedBill(bill);
         setIsEditMode(editMode);
         setModalName(modalName);
-        PopulateForms(bill);  
-    }; 
+        PopulateForms(bill);
+
+        console.log("ID:", bill['hospital_bill_id'])
+    };
  
     const handleAddRecord = (editMode = false, modalName) => { 
         /* ResetForms(); */
         setIsEditMode(editMode);
         setModalName(modalName)  
     };
- 
-    const PopulateForms = (bill) => {
-        console.log("Populating forms with:", bill); // Check all values
-        console.log("Claimant Barangay:", bill['patient_barangay']); // Specifically check this value
 
+    const PopulateForms = (bill) => {
         setHospitalId(bill['hospital_bill_id']);
         setPatientFirstName(bill['patient_fname']);
         setPatientMiddleName(bill['patient_mname']);
         setPatientLastName(bill['patient_lname']);
-        setPatientExtName(bill['patient_ext_name']); 
-        setPatientPurok(bill['patient_purok']);
-        setPatientBarangay(bill['patient_barangay']);
-        setPatientMunicipality(bill['patient_municipality']);
-        setPatientProvince(bill['patient_province']);
+        setPatientExtName(bill['patient_ext_name']);
+        setPatientAddress(bill['patient_address']);
         setPatientHospital(bill['patient_hospital']);
         setClaimantFname(bill['claimant_fname']);
         setClaimantMname(bill['claimant_mname']);
         setClaimantLname(bill['claimant_lname']);
         setClaimantExtName(bill['claimant_extname']);
-
-        // ✅ Fix for the select tag issue
-        setClaimantRelationship(bill['claimant_relationship']?.trim() || ""); 
-
+        setClaimantRelationship(bill['claimant_relationship']);
         setClaimantContact(bill['claimant_contact']);
-        setClaimantAmount(bill['claimant_amount']);  
-
-        document.getElementById("relationship").value = bill['claimant_relationship']
-    };
-
+        setClaimantAmount(bill['claimant_amount']); 
+    }
 
     const ResetForms = () => {
         // ✅ Reset all input fields after successful save
         setPatientFirstName('');
         setPatientMiddleName('');
         setPatientLastName('');
-        setPatientExtName(''); 
-        setPatientPurok('');
-        setPatientBarangay('');
-        setPatientMunicipality('');
-        setPatientProvince('');
+        setPatientExtName('');
+        setPatientAddress('');
         setPatientHospital('');
         setClaimantFname('');
         setClaimantMname('');
@@ -288,79 +267,6 @@ function ManageHospitalBillContent(){
         }
     })
 
-    const municipalityBarangays = {
-        "Basud": ["Angas", "Bactas", "Binatagan", "Caayunan", "Guinatungan", "Hinampacan", "Langa", "Laniton", "Lidong", "Mampili", "Mandazo", "Mangcamagong", "Manmuntay", 
-            "Mantugawe", "Matnog", "Mocong", "Oliva", "Pagsangahan", "Pinagwarasan", "Plaridel", "Poblacion 1", "Poblacion 2", "San Felipe", "San Jose", "San Pascual", "Taba-taba", "Tacad", "Taisan", "Tuaca"],
-
-        "Capalonga": ["Alayao", "Binawangan", "Calabaca", "Camagsaan", "Catabaguangan", "Catioan", "Del Pilar", "Itok", "Lucbanan", "Mabini", "Mactang", "Magsaysay", "Mataque", 
-            "Old Camp", "Poblacion", "San Antonio", "San Isidro", "San Roque", "Tanawan", "Ubang", "Villa Aurora", "Villa Belen"],
-
-        "Daet": ["Alawihao", "Awitan", "Bagasbas", "Barangay I", "Barangay II", "Barangay III", "Barangay IV", "Barangay V", "Barangay VI", "Barangay VII", "Barangay VIII", 
-            "Bibirao", "Borabod", "Calasgasan", "Camambugan", "Cobangbang", "Dogongan", "Gahonon", "Gubat", "Lag-on", "Magang", "Mambalite", "Mancruz", "Pamorangon", "San Isidro"],
-
-        "Jose Panganiban": [
-            "Bagong Bayan", "Calero", "Dahican", "Dayhagan", "Larap", "Luklukan Norte", "Luklukan Sur", "Motherlode", "Nakalaya", "North Poblacion",
-            "Osmeña", "Pag-asa", "Parang", "Plaridel", "Salvacion", "San Isidro", "San Jose", "San Martin", "San Pedro", "San Rafael",
-            "Santa Cruz", "Santa Elena", "Santa Milagrosa", "Santa Rosa Norte", "Santa Rosa Sur", "South Poblacion", "Tamisan"
-        ], 
-
-        "Labo": [
-            "Anahaw", "Anameam", "Awitan", "Baay", "Bagacay", "Bagong Silang I", "Bagong Silang II", "Bagong Silang III", "Bakiad", "Bautista", "Bayabas", "Bayan-bayan", "Benit", 
-            "Bulhao", "Cabatuhan", "Cabusay",  "Calabasa", "Canapawan", "Daguit", "Dalas", "Dumagmang", "Exciban", "Fundado", "Guinacutan", "Guisican", "Gumamela", "Iberica", 
-            "Kalamunding", "Lugui", "Mabilo I", "Mabilo II", "Macogon", "Mahawan-hawan", "Malangcao-Basud", "Malasugui", "Malatap", "Malaya", "Malibago", "Maot", "Masalong", 
-            "Matanlang", "Napaod", "Pag-asa", "Pangpang", "Pinya", "San Antonio", "San Francisco", "Santa Cruz", "Submakin", "Talobatib", "Tigbinan", "Tulay na Lupa"],
-
-        "Mercedes": [
-            "Apuao", "Barangay I", "Barangay II", "Barangay III", "Barangay IV", "Barangay V", "Barangay VI", "Barangay VII", "Caringo", "Catandunganon", "Cayucyucan", "Colasi",
-            "Del Rosario", "Gaboc", "Hamoraon", "Hinipaan", "Lalawigan", "Lanot", "Mambungalon", "Manguisoc", "Masalongsalong", "Matoogtoog", "Pambuhan", "Quinapaguian", "San Roque", "Tarum"
-        ], 
-
-        "Paracale": [
-            "Awitan", "Bagumbayan", "Bakal", "Batobalani", "Calaburnay", "Capacuan","Casalugan", "Dagang", "Dalnac", "Dancalan", "Gumaus", "Labnig", "Macolabo Island",
-            "Malacbang", "Malaguit", "Mampungo", "Mangkasay", "Maybato", "Palanas","Pinagbirayan Malaki", "Pinagbirayan Munti", "Poblacion Norte", "Poblacion Sur",
-            "Tabas", "Talusan", "Tawig", "Tugos"
-        ],
-
-        "San Lorenzo Ruiz": [
-            "Daculang Bolo", "Dagotdotan", "Langga", "Laniton", "Maisog", "Mampurog",
-            "Manlimonsito", "Matacong", "Salvacion", "San Antonio", "San Isidro", "San Ramon"
-        ],
-
-        "San Vicente": [
-            "Asdum", "Cabanbanan", "Calabagas", "Fabrica", "Iraya Sur", 
-            "Man-ogob", "Poblacion District I", "Poblacion District II", "San Jose"
-        ],
-
-        "Santa Elena": [
-            "Basiad", "Bulala", "Don Tomas", "Guitol", "Kabuluan", "Kagtalaba",
-            "Maulawin", "Patag Ibaba", "Patag Iraya", "Plaridel", "Polungguitguit",
-            "Rizal", "Salvacion", "San Lorenzo", "San Pedro", "San Vicente",
-            "Santa Elena", "Tabugon", "Villa San Isidro"
-        ],
-        
-        "Talisay": [
-            "Binanuaan", "Caawigan", "Cahabaan", "Calintaan", "Del Carmen",
-            "Gabon", "Itomang", "Poblacion", "San Francisco", "San Isidro",
-            "San Jose", "San Nicolas", "Santa Cruz", "Santa Elena", "Santo Niño"
-        ],
-
-        "Vinzons": [
-            "Aguit-it", "Banocboc", "Barangay I", "Barangay II", "Barangay III",
-            "Cagbalogo", "Calangcawan Norte", "Calangcawan Sur", "Guinacutan",
-            "Mangcawayan", "Mangcayo", "Manlucugan", "Matango", "Napilihan",
-            "Pinagtigasan", "Sabang", "Santo Domingo", "Singi", "Sula"
-        ]
-
-    };
-    
-
-    const handleMunicipalityChange = (e) => {
-        const selectedMunicipality = e.target.value.trim();
-        setPatientMunicipality(selectedMunicipality);
-        setPatientBarangay(''); // Reset barangay selection
-        setBarangayList(municipalityBarangays[selectedMunicipality] || []);
-    };  
-    
     return(
         <>
             <main id="main" className="main">
@@ -411,10 +317,10 @@ function ManageHospitalBillContent(){
                                                                 <button
                                                                     className="btn btn-primary btn-sm"
                                                                     data-bs-toggle="modal"
-                                                                    data-bs-target="#addHospitalBillModal"
+                                                                    data-bs-target="#addHospitalBillModal"  
                                                                     onClick={() => handleAddRecord(true, "Add")}
                                                                 >
-                                                                    + Add Hospital Bill
+                                                                    + Add Hospital Bil
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -473,15 +379,15 @@ function ManageHospitalBillContent(){
                                                         <div className="d-flex justify-content-between mt-3">
                                                             <button 
                                                                 className="btn btn-secondary"
-                                                                disabled={currentPage === 1 || totalPages === 0}
+                                                                disabled={currentPage === 1}
                                                                 onClick={() => setCurrentPage(currentPage - 1)}
                                                             >
                                                                 Previous
                                                             </button>
-                                                            <span>Page {totalPages > 0 ? currentPage : 0} of {totalPages}</span>
+                                                            <span>Page {currentPage} of {totalPages}</span>
                                                             <button 
                                                                 className="btn btn-secondary"
-                                                                disabled={currentPage === totalPages || totalPages === 0}
+                                                                disabled={currentPage === totalPages}
                                                                 onClick={() => setCurrentPage(currentPage + 1)}
                                                             >
                                                                 Next
@@ -562,78 +468,34 @@ function ManageHospitalBillContent(){
                                             onChange={(e) => setPatientExtName(e.target.value.trim())} 
                                         />
                                     </div>
-
-                                    <div className="col-3">
-                                        <br />
-                                        <label className="form-label">Province:</label>
-                                        <select
-                                            className="form-control"
-                                            value={patientProvince}
-                                            disabled
-                                        >
-                                            <option value="Camarines Norte">Camarines Norte</option>
-                                        </select>
-                                    </div>
- 
-                                    <div className="col-3">
-                                        <br />
-                                        <label className="form-label">Municipality:</label>
-                                        <select
-                                            className="form-control"
-                                            value={patientMunicipality}
-                                            onChange={handleMunicipalityChange}
-                                        >
-                                            <option value="">Select Municipality</option>
-                                            {Object.keys(municipalityBarangays).map((municipality) => (
-                                                <option key={municipality} value={municipality}>
-                                                    {municipality}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
- 
-                                    <div className="col-3">
-                                        <br />
-                                        <label className="form-label">Barangay:</label>
-                                        <select
-                                            className="form-control"
-                                            value={patientBarangay}
-                                            onChange={(e) => setPatientBarangay(e.target.value.trim())}
-                                            disabled={barangayList.length === 0}
-                                        >
-                                            <option value="">Select Barangay</option>
-                                            {barangayList.map((barangay) => (
-                                                <option key={barangay} value={barangay}>
-                                                    {barangay}
-                                                </option>
-                                            ))} : {
-                                                <option key={patientBarangay} value={patientBarangay}>
-                                                    {patientBarangay}
-                                                </option>
-                                            }
-                                
-                                        </select>
-                                    </div>
- 
-                                    <div className="col-3">
-                                        <br />
-                                        <label className="form-label">Purok:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            value={patientPurok}
-                                            onChange={(e) => setPatientPurok(e.target.value)}
-                                        />
-                                    </div>  
                                     
                                     <div className="col-12">
-                                        <br /> 
+                                        <br />
+
+
+                                        <label htmlFor="extName" className="form-label">Address:</label>
+                                         
+                                        <textarea
+                                            type="text"
+                                            className="form-control"
+                                            id="address"
+                                            value={patientAddress}
+                                            onChange={(e) => setPatientAddress(e.target.value)} 
+                                            rows={2}>
+
+                                        </textarea>
+                                    </div>
+
+                                    
+                                    <div className="col-12">
+                                        <br />
+
                                         <label htmlFor="extName" className="form-label">Hospital:</label>
                                           
 
                                         <select
                                             className="form-control"
-                                            id="hospital"   
+                                            id="hospital"  // ✅ Correct
                                             value={patientHospital}
                                             onChange={(e) => setPatientHospital(e.target.value)} >
                                                 <option value="">Select Hospital</option>
@@ -649,9 +511,13 @@ function ManageHospitalBillContent(){
                                                 <option value="JOSE PANGANIBAN PRIMARY HOSPITAL">JOSE PANGANIBAN PRIMARY HOSPITAL</option> 
                                         </select>
                                     </div>
- 
-                                </div> 
-                                <br />  
+
+                                    
+                                </div>
+
+                                <br />
+                                
+
                                 <h3>Claimant Information</h3><br />
                                 <div className="row">
                                     <div className="col-3"> 
@@ -701,29 +567,15 @@ function ManageHospitalBillContent(){
                                     
                                     <div className="col-3">
                                         <br />
-                                        <label htmlFor="relationship" className="form-label">Relationship:</label>
-                                        <select
+                                        <label htmlFor="extName" className="form-label">Relationship:</label>
+                                        <input
+                                            type="text"
                                             className="form-control"
-                                            id="relationship"
+                                            id="extName"
                                             value={claimantRelationship}
-                                            onChange={(e) => setClaimantRelationship(e.target.value)}
-                                        >
-                                            <option value="">Select Relationship</option>
-                                            <option value="Mother">Mother</option>
-                                            <option value="Father">Father</option>
-                                            <option value="Child">Child</option>
-                                            <option value="Father">Self</option>
-                                            <option value="Parent">Parent</option>
-                                            <option value="Sibling">Sibling</option>
-                                            <option value="Spouse">Spouse</option>
-                                            <option value="Grandparent">Grandparent</option>
-                                            <option value="Relative">Relative</option>
-                                            <option value="Friend">Friend</option>
-                                            <option value="Guardian">Guardian</option>
-                                            <option value="Other">Other</option>
-                                        </select>
+                                            onChange={(e) => setClaimantRelationship(e.target.value)} 
+                                        />
                                     </div>
-
                                     
                                     <div className="col-3">
                                         <br />

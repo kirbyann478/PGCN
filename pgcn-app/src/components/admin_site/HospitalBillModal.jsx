@@ -5,7 +5,7 @@ import { Modal, Button, Form } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css'; 
 import FetchLocalUserDetails from "./scripts/FetchLocalUser"; 
 
-function ManageHospitalBillContent(){
+function HospitalBillModal(){
     const { localUserDetails } = FetchLocalUserDetails();
     const [ account_id, setLocalUserId ] = useState(null);
 
@@ -149,8 +149,7 @@ function ManageHospitalBillContent(){
     
         console.log("Submitting hospital bill with data:", {
             billId, account_id,
-            patientFirstName, patientMiddleName, patientLastName, patientExtName, 
-            patientPurok, patientBarangay, patientMunicipality, patientProvince, patientHospital,
+            patientFirstName, patientMiddleName, patientLastName, patientExtName, patientAddress, patientHospital,
             claimantFirstname, claimantMiddlename, claimantLastname, claimantExtName, claimantRelationship, claimantContact,
             claimantAmount, currentDateTime
         });
@@ -161,8 +160,7 @@ function ManageHospitalBillContent(){
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     billId, account_id,
-                    patientFirstName, patientMiddleName, patientLastName, patientExtName, 
-                    patientPurok, patientBarangay, patientMunicipality, patientProvince, patientHospital,
+                    patientFirstName, patientMiddleName, patientLastName, patientExtName, patientAddress, patientHospital,
                     claimantFirstname, claimantMiddlename, claimantLastname, claimantExtName, claimantRelationship, claimantContact,
                     claimantAmount, currentDateTime
                 })                
@@ -190,26 +188,7 @@ function ManageHospitalBillContent(){
         }
     }; 
 
-    const fetchHospitalBills = async () => {
-        try {
-            const response = await fetch("http://192.168.1.248:5000/retrieve_hospital_bill");
-            const data = await response.json();
-            setHospitalBills(data);
- 
-        } catch (error) {
-            console.error("Error fetching hospital bills:", error);
-        }
-    };
-
-    // Handle any real-time updates (for example, using WebSockets or polling)
-    useEffect(() => { 
-        const interval = setInterval(() => {
-            fetchHospitalBills(); // Refresh the records periodically
-        }, 2000); // Refresh every 5 seconds (you can adjust the time)
-
-        return () => clearInterval(interval); // Cleanup interval when the component unmounts
-    }, []); 
-
+      
     // Pagination Logic
     const indexOfLastRecord = currentPage * recordsPerPage;
     const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
@@ -221,19 +200,18 @@ function ManageHospitalBillContent(){
         setSelectedBill(bill);
         setIsEditMode(editMode);
         setModalName(modalName);
-        PopulateForms(bill);  
-    }; 
+        PopulateForms(bill);
+
+        console.log("ID:", bill['hospital_bill_id'])
+    };
  
     const handleAddRecord = (editMode = false, modalName) => { 
         /* ResetForms(); */
         setIsEditMode(editMode);
         setModalName(modalName)  
     };
- 
-    const PopulateForms = (bill) => {
-        console.log("Populating forms with:", bill); // Check all values
-        console.log("Claimant Barangay:", bill['patient_barangay']); // Specifically check this value
 
+    const PopulateForms = (bill) => {
         setHospitalId(bill['hospital_bill_id']);
         setPatientFirstName(bill['patient_fname']);
         setPatientMiddleName(bill['patient_mname']);
@@ -248,16 +226,10 @@ function ManageHospitalBillContent(){
         setClaimantMname(bill['claimant_mname']);
         setClaimantLname(bill['claimant_lname']);
         setClaimantExtName(bill['claimant_extname']);
-
-        // ✅ Fix for the select tag issue
-        setClaimantRelationship(bill['claimant_relationship']?.trim() || ""); 
-
+        setClaimantRelationship(bill['claimant_relationship']);
         setClaimantContact(bill['claimant_contact']);
-        setClaimantAmount(bill['claimant_amount']);  
-
-        document.getElementById("relationship").value = bill['claimant_relationship']
-    };
-
+        setClaimantAmount(bill['claimant_amount']); 
+    }
 
     const ResetForms = () => {
         // ✅ Reset all input fields after successful save
@@ -287,6 +259,8 @@ function ManageHospitalBillContent(){
             setLocalUserId(localUserDetails['account_id']);
         }
     })
+
+    // Selector
 
     const municipalityBarangays = {
         "Basud": ["Angas", "Bactas", "Binatagan", "Caayunan", "Guinatungan", "Hinampacan", "Langa", "Laniton", "Lidong", "Mampili", "Mandazo", "Mangcamagong", "Manmuntay", 
@@ -359,152 +333,10 @@ function ManageHospitalBillContent(){
         setPatientMunicipality(selectedMunicipality);
         setPatientBarangay(''); // Reset barangay selection
         setBarangayList(municipalityBarangays[selectedMunicipality] || []);
-    };  
-    
+    };
+
     return(
-        <>
-            <main id="main" className="main">
-                <div className="content">
-                    <h1>Manage Hospital Bill</h1>
-                    <nav>
-                        <ol className="breadcrumb">
-                            <li className="breadcrumb-item">
-                                <a>Admin</a>
-                            </li>
-                            <li className="breadcrumb-item active">Manage Hospital Bill</li>
-                        </ol>
-                    </nav>
-                </div>
-
-                <hr />
-
-                <main className="py-6  ">
-                    <div className="container-fluid">
-                        <section className="section dashboard">
-                            <div className="row">
-
-                                <div className="col-lg-12">
-                                    <div className="row">
-                                        <div className="col-xxl-12 col-md-12">
-                                            <div className="card info-card sales-card">
-                                                <div className="card-body">
-                                                    <div className="d-flex justify-content-between align-items-center">
-                                                        <h5 className="card-title">List of Hospital Bill</h5>
-                                                    </div>
-
-                                                    {/* Filter and Search Section */}
-                                                    <div className="row mb-3">
-                                                        <div className="col-sm-3">
-                                                            <div className="input-group">
-                                                                <input
-                                                                    type="text"
-                                                                    className="form-control"
-                                                                    id="searchInput"
-                                                                    placeholder="Search Patient Name"
-                                                                    /* onChange={handleSearch} */
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                        <div className="col-sm-6"></div>
-                                                        <div className="col-sm-3">
-                                                            <div className="input-group d-flex justify-content-end">
-                                                                <button
-                                                                    className="btn btn-primary btn-sm"
-                                                                    data-bs-toggle="modal"
-                                                                    data-bs-target="#addHospitalBillModal"
-                                                                    onClick={() => handleAddRecord(true, "Add")}
-                                                                >
-                                                                    + Add Hospital Bill
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="table-responsive">
-                                                        <table className="table datatable table-custom">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>No.</th>
-                                                                    <th>Patient Name</th>
-                                                                    <th>Claimant Name</th>
-                                                                    <th>Contact</th>
-                                                                    <th>Date Registered</th>
-                                                                    <th>Action</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {currentRecords.length > 0 ? (
-                                                                    currentRecords.map((bill, index) => (
-                                                                        <tr key={bill.id}>
-                                                                            <td>{indexOfFirstRecord + index + 1}</td>
-                                                                            <td>{`${bill.patient_fname} ${bill.patient_mname} ${bill.patient_lname} ${bill.patient_ext_name || ""}`}</td>
-                                                                            <td>{`${bill.claimant_fname} ${bill.claimant_mname} ${bill.claimant_lname} ${bill.claimant_extname || ""}`}</td>
-                                                                            <td>{bill.claimant_contact}</td>
-                                                                            <td>{new Date(bill.datetime_added).toLocaleString()}</td>
-                                                                            <td>
-                                                                                <button className="btn btn-success" onClick={() => handleOpenModal(bill, true, "View")}
-                                                                                    data-bs-toggle="modal"
-                                                                                    data-bs-target="#addHospitalBillModal">
-                                                                                    <i className="bi bi-eye"></i> View
-                                                                                </button>
-                                                                                <button className="btn btn-primary" onClick={() => handleOpenModal(bill, true, "Edit")}
-                                                                                    data-bs-toggle="modal"
-                                                                                    data-bs-target="#addHospitalBillModal">
-                                                                                    <i className="bi bi-pencil"></i> Edit
-                                                                                </button>
-                                                                                <button className="btn btn-danger" 
-                                                                                    onClick={(e) => handleDeleteHospitalBill(e, bill['hospital_bill_id'])} >
-                                                                                    <i className="bi bi-trash3"></i> Delete
-                                                                                </button>
-                                                                            </td>
-                                                                        </tr>
-                                                                    ))
-                                                                ) : (
-                                                                    <tr>
-                                                                        <td colSpan="6" className="text-center">No records found</td>
-                                                                    </tr>
-                                                                )}
-                                                            </tbody>
-                                                        </table>
-
-                                                        <br />
-
-                                                        {/* Pagination Controls */}
-                                                        <div className="d-flex justify-content-between mt-3">
-                                                            <button 
-                                                                className="btn btn-secondary"
-                                                                disabled={currentPage === 1 || totalPages === 0}
-                                                                onClick={() => setCurrentPage(currentPage - 1)}
-                                                            >
-                                                                Previous
-                                                            </button>
-                                                            <span>Page {totalPages > 0 ? currentPage : 0} of {totalPages}</span>
-                                                            <button 
-                                                                className="btn btn-secondary"
-                                                                disabled={currentPage === totalPages || totalPages === 0}
-                                                                onClick={() => setCurrentPage(currentPage + 1)}
-                                                            >
-                                                                Next
-                                                            </button>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-
-
-                            </div>
-                        </section>
-                    </div>
-                </main>
-            </main>
-
-            {/* Modal */}
+        <>   
             <div className="modal fade" id="addHospitalBillModal" tabIndex="-1" aria-labelledby="addHospitalBillModal" aria-hidden="true">
                 <div className="modal-dialog modal-xl">
                     <div className="modal-content">
@@ -574,7 +406,8 @@ function ManageHospitalBillContent(){
                                             <option value="Camarines Norte">Camarines Norte</option>
                                         </select>
                                     </div>
- 
+
+                                    {/* Municipality */}
                                     <div className="col-3">
                                         <br />
                                         <label className="form-label">Municipality:</label>
@@ -591,7 +424,8 @@ function ManageHospitalBillContent(){
                                             ))}
                                         </select>
                                     </div>
- 
+
+                                    {/* Barangay */}
                                     <div className="col-3">
                                         <br />
                                         <label className="form-label">Barangay:</label>
@@ -606,15 +440,11 @@ function ManageHospitalBillContent(){
                                                 <option key={barangay} value={barangay}>
                                                     {barangay}
                                                 </option>
-                                            ))} : {
-                                                <option key={patientBarangay} value={patientBarangay}>
-                                                    {patientBarangay}
-                                                </option>
-                                            }
-                                
+                                            ))}
                                         </select>
                                     </div>
- 
+
+                                    {/* Purok */}
                                     <div className="col-3">
                                         <br />
                                         <label className="form-label">Purok:</label>
@@ -709,13 +539,10 @@ function ManageHospitalBillContent(){
                                             onChange={(e) => setClaimantRelationship(e.target.value)}
                                         >
                                             <option value="">Select Relationship</option>
-                                            <option value="Mother">Mother</option>
-                                            <option value="Father">Father</option>
-                                            <option value="Child">Child</option>
-                                            <option value="Father">Self</option>
                                             <option value="Parent">Parent</option>
                                             <option value="Sibling">Sibling</option>
                                             <option value="Spouse">Spouse</option>
+                                            <option value="Child">Child</option>
                                             <option value="Grandparent">Grandparent</option>
                                             <option value="Relative">Relative</option>
                                             <option value="Friend">Friend</option>
@@ -790,4 +617,4 @@ function ManageHospitalBillContent(){
     )
 }
 
-export default ManageHospitalBillContent;
+export default HospitalBillModal;
