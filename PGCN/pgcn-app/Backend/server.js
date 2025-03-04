@@ -410,4 +410,168 @@ app.post("/delete_hospital_bill", (req, res) => {
     });
 });
 
+const multer = require("multer");
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post("/insert_burial_assistance", upload.single("deathCertificate"), (req, res) => {
+    const { 
+        account_id,
+        deceasedFirstName, deceasedMiddleName, deceasedLastName, deceasedExtName, 
+        deceasedPurok, deceasedBarangay, deceasedMunicipality, deceasedProvince, deceasedGender, deceasedDeathDate, 
+        contactPersonFirstname, contactPersonMiddlename, contactPersonLastname, contactPersonExtName, contactNumber,
+        contactPersonServiceCovered, contactPersonFuneralService, contactPersonEncoded, currentDateTime
+    } = req.body;  
+
+    const deathCertificate = req.file ? req.file.buffer : null; // Convert file to buffer
+
+    const insertBurialAssistanceQuery = `
+        INSERT INTO burial_assistance 
+        (account_id, deceased_fname, deceased_mname, deceased_lname, deceased_ext_name, 
+        deceased_purok, deceased_barangay, deceased_municipality, deceased_province, 
+        deceased_gender, deceased_deathdate, death_certificate, contact_fname, contact_mname, contact_lname, contact_ext_name, contact_number,
+        contact_service_covered, contact_funeral_service, contact_person_encoded, savedAt) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.getConnection((err, connection) => {
+        if (err) {
+            console.error("Database Connection Error:", err);
+            return res.status(500).json({ error: "Database connection failed." });
+        }
+
+        connection.beginTransaction((err) => {
+            if (err) {
+                console.error("Transaction Error:", err);
+                connection.release();
+                return res.status(500).json({ error: "Transaction initialization failed." });
+            }
+
+            connection.query(insertBurialAssistanceQuery, [
+                account_id,
+                deceasedFirstName, deceasedMiddleName, deceasedLastName, deceasedExtName, 
+                deceasedPurok, deceasedBarangay, deceasedMunicipality, deceasedProvince, deceasedGender, deceasedDeathDate, deathCertificate,
+                contactPersonFirstname, contactPersonMiddlename, contactPersonLastname, contactPersonExtName, contactNumber,
+                contactPersonServiceCovered, contactPersonFuneralService, contactPersonEncoded, currentDateTime
+            ], (err, result) => {        
+                if (err) {
+                    console.error("Burial Assistance Insertion Error:", err.sqlMessage || err);
+                    return connection.rollback(() => {
+                        connection.release();
+                        res.status(500).json({ error: "Failed to insert burial assistance record." });
+                    });
+                }
+
+                connection.commit((err) => {
+                    if (err) {
+                        console.error("Transaction Commit Error:", err);
+                        return connection.rollback(() => {
+                            connection.release();
+                            res.status(500).json({ error: "Transaction commit failed." });
+                        });
+                    }
+
+                    connection.release();
+                    res.json({ message: "Burial assistance record inserted successfully!", burial_id: result.insertId });
+                });
+            });
+        });
+    });
+});
+
+app.get("/retrieve_burial_assistance", (req, res) => {
+    db.query("SELECT * FROM burial_assistance", (err, results) => {
+        if (err) {
+            console.error("Error retrieving burial assistance records:", err);
+            return res.status(500).json({ error: "Database error." });
+        }
+
+        // Convert BLOB to Base64 if it exists
+        const burialRecords = results.map(row => ({
+            ...row,
+            death_certificate: row.death_certificate 
+                ? Buffer.from(row.death_certificate).toString("base64") 
+                : null
+        }));
+
+        res.json(burialRecords);
+    });
+});
+
+
+app.post("/update_burial_assistance", upload.single("deathCertificate"), (req, res) => {
+    const {
+        burialId, account_id,
+        deceasedFirstName, deceasedMiddleName, deceasedLastName, deceasedExtName,
+        deceasedPurok, deceasedBarangay, deceasedMunicipality, deceasedProvince, deceasedGender, deceasedDeathDate,
+        contactPersonFirstname, contactPersonMiddlename, contactPersonLastname, contactPersonExtName, contactNumber,
+        contactPersonServiceCovered, contactPersonFuneralService, contactPersonEncoded, currentDateTime
+    } = req.body;
+
+    const deathCertificate = req.file ? req.file.buffer : null;
+
+    let updateBurialAssistanceQuery = `
+        UPDATE burial_assistance SET 
+        account_id = ?, deceased_fname = ?, deceased_mname = ?, deceased_lname = ?, deceased_ext_name = ?, 
+        deceased_purok = ?, deceased_barangay = ?, deceased_municipality = ?, deceased_province = ?,
+        deceased_gender = ?, deceased_deathdate = ?, contact_fname = ?, contact_mname = ?, contact_lname = ?, contact_ext_name = ?, contact_number = ?,
+        contact_service_covered = ?, contact_funeral_service = ?, contact_person_encoded = ?, savedAt = ?
+    `;
+
+    const queryParams = [
+        account_id,
+        deceasedFirstName, deceasedMiddleName, deceasedLastName, deceasedExtName,
+        deceasedPurok, deceasedBarangay, deceasedMunicipality, deceasedProvince, deceasedGender, deceasedDeathDate,
+        contactPersonFirstname, contactPersonMiddlename, contactPersonLastname, contactPersonExtName, contactNumber,
+        contactPersonServiceCovered, contactPersonFuneralService, contactPersonEncoded, currentDateTime
+    ];
+
+    if (deathCertificate) {
+        updateBurialAssistanceQuery += ", death_certificate = ?";
+        queryParams.push(deathCertificate);
+    }
+
+    updateBurialAssistanceQuery += " WHERE burial_id = ?";
+    queryParams.push(burialId);
+
+    db.query(updateBurialAssistanceQuery, queryParams, (err, result) => {
+        if (err) {
+            console.error("Burial Assistance Update Error:", err.sqlMessage || err);
+            return res.status(500).json({ error: "Failed to update burial assistance record." });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "No record updated. Burial ID may not exist." });
+        }
+
+        res.json({ message: "Burial assistance record updated successfully!" });
+    });
+});
+
+
+app.post("/delete_burial_assistance", (req, res) => {
+    const { burialId } = req.body;
+ 
+    if (!burialId) {
+        return res.status(400).json({ error: "burialId is required." });
+    }
+
+    // SQL query to delete the hospital bill by billId
+    const deleteBurialAssistanceQuery = "DELETE FROM burial_assistance WHERE burial_id = ?";
+
+    // Execute the DELETE query
+    db.query(deleteBurialAssistanceQuery, [burialId], (err, results) => {
+        if (err) {
+            console.error("Database Error:", err);
+            return res.status(500).json({ error: "Internal server error." });
+        }
+
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ error: "Burial assistance not found." });
+        }
+ 
+        res.json({ message: "Burial assistance deleted successfully!" });
+    });
+});
+
+
 app.listen(process.env.VITE_PORT, () => console.log(`Server running on port ${process.env.VITE_PORT}`));

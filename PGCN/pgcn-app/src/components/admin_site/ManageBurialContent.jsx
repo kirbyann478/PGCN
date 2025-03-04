@@ -25,25 +25,27 @@ function ManageBurialContent(){
 
     const [deceasedGender, setDeceasedGender] = useState('');
     const [deceasedDeathDate, setDeceasedDeathDate] = useState('');
+    const [deathCertificate, setDeathCertificate] = useState(null);
 
     const [contactPersonFirstname, setContactPersonFname] = useState('');
     const [contactPersonMiddlename, setContactPersonMname] = useState('');
     const [contactPersonLastname, setContactPersonLname] = useState('');
     const [contactPersonExtName, setContactPersonExtName] = useState('');
+    const [contactNumber, setContactNumber] = useState('');
     const [contactPersonServiceCovered, setContactPersonServiceCovered] = useState('');
     const [contactPersonFuneralService, setContactPersonFuneralCovered] = useState('');
     const [contactPersonEncoded, setContactPersonEncoded] = useState('');
     // Variables for inputs ------------------------------------------------------------
 
     // Variables for hospital bills -------------------------------
-    const [hospitalBills, setHospitalBills] = useState([]);
+    const [burialAssitance, setBurialAssitance] = useState([]);
     // Variables for hospital bills -------------------------------
 
     // Variables for pagination -------------------------------
     const [currentPage, setCurrentPage] = useState(1);
     const recordsPerPage = 10;
 
-    const [selectedBill, setSelectedBill] = useState(null);
+    const [selectedBurial, setSelectedBurial] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [modalName, setModalName] = useState();
@@ -52,28 +54,37 @@ function ManageBurialContent(){
     const handleAddHospitalBill = async (e) => {
         e.preventDefault();
     
-        // Get current date-time in yyyy-mm-dd HH:mm:ss format
-        const currentDateTime = new Date().toISOString().slice(0, 19).replace("T", " ");
+        const formData = new FormData();
+        formData.append("account_id", account_id);
+        formData.append("deceasedFirstName", deceasedFirstName);
+        formData.append("deceasedMiddleName", deceasedMiddleName);
+        formData.append("deceasedLastName", deceasedLastName);
+        formData.append("deceasedExtName", deceasedExtName);
+        formData.append("deceasedPurok", deceasedPurok);
+        formData.append("deceasedBarangay", deceasedBarangay);
+        formData.append("deceasedMunicipality", deceasedMunicipality);
+        formData.append("deceasedProvince", deceasedProvince);
+        formData.append("deceasedGender", deceasedGender);
+        formData.append("deceasedDeathDate", deceasedDeathDate);
+        formData.append("contactPersonFirstname", contactPersonFirstname);
+        formData.append("contactPersonMiddlename", contactPersonMiddlename);
+        formData.append("contactPersonLastname", contactPersonLastname);
+        formData.append("contactPersonExtName", contactPersonExtName);
+        formData.append("contactNumber", contactNumber);
+        formData.append("contactPersonServiceCovered", contactPersonServiceCovered);
+        formData.append("contactPersonFuneralService", contactPersonFuneralService);
+        formData.append("contactPersonEncoded", contactPersonEncoded);
+        formData.append("currentDateTime", new Date().toISOString().slice(0, 19).replace("T", " "));
     
-        console.log("Submitting hospital bill with data:", {
-            burialId, account_id,
-            deceasedFirstName, deceasedMiddleName, deceasedLastName, deceasedExtName, 
-            deceasedPurok, deceasedBarangay, deceasedMunicipality, deceasedProvince, deceasedGender, deceasedDeathDate,
-            contactPersonFirstname, contactPersonMiddlename, contactPersonLastname, contactPersonExtName, 
-            contactPersonServiceCovered, contactPersonFuneralService, contactPersonEncoded
-        });
+        // Append the file (deathCertificate should be from an <input type="file"> element)
+        if (deathCertificate) {
+            formData.append("deathCertificate", deathCertificate);
+        }
     
         try {
-            const response = await fetch("http://localhost:5000/insert_burial_content", {
+            const response = await fetch("http://localhost:5000/insert_burial_assistance", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    burialId, account_id,
-                    deceasedFirstName, deceasedMiddleName, deceasedLastName, deceasedExtName, 
-                    deceasedPurok, deceasedBarangay, deceasedMunicipality, deceasedProvince, deceasedGender, deceasedDeathDate,
-                    contactPersonFirstname, contactPersonMiddlename, contactPersonLastname, contactPersonExtName, 
-                    contactPersonServiceCovered, contactPersonFuneralService, contactPersonEncoded
-                })                
+                body: formData // No need for `Content-Type`, fetch will set it automatically
             });
     
             const data = await response.json();
@@ -87,9 +98,8 @@ function ManageBurialContent(){
                 title: "Transaction Successful",
                 text: "Hospital bill has been recorded successfully!",
             }).then(() => {
-                ResetForms(); // Reset the forms after the user clicks "OK"
+                ResetForms(); // Reset the forms after success
             });
-            
     
         } catch (err) {
             console.error("Error:", err.message);
@@ -99,16 +109,15 @@ function ManageBurialContent(){
                 text: err.message || "An error occurred while saving the hospital bill.",
             });
         }
-    }; 
+    };
+    
 
-    /* const handleDeleteHospitalBill = async (e, billId) => {
+    const handleDeleteBurialAssistance = async (e, burialId) => {
         e.preventDefault();
-    
-        console.log("Testtt", billId); // Ensure billId is being passed correctly
-    
+     
         Swal.fire({
             title: 'Are you sure?',
-            text: "This will delete the hospital bill record permanently!",
+            text: "This will delete the burial assistance record permanently!",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
@@ -119,12 +128,12 @@ function ManageBurialContent(){
             if (swalResult.isConfirmed) {
                 try {
                     // Sending DELETE request to the backend
-                    const response = await fetch('http://localhost:5000/delete_burial_content', {
+                    const response = await fetch('http://localhost:5000/delete_burial_assistance', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ billId }) // Send the billId to the server
+                        body: JSON.stringify({ burialId }) // Send the billId to the server
                     });
     
                     const serverResult = await response.json(); // Renamed result to serverResult
@@ -135,72 +144,84 @@ function ManageBurialContent(){
                         Swal.fire('Error!', serverResult.error, 'error');  
                     }
                 } catch (error) {
-                    console.error("Error deleting hospital bill:", error);
-                    Swal.fire('Error!', 'An error occurred while deleting the bill.', 'error');
+                    console.error("Error deleting burial assistance id:", error);
+                    Swal.fire('Error!', 'An error occurred while deleting the burial.', 'error');
                 }
             } else {
                 // If canceled
-                Swal.fire('Cancelled', 'The hospital bill was not deleted.', 'info');
+                Swal.fire('Cancelled', 'The burial assistance was not deleted.', 'info');
             }
         });
     };
-    
-    
+     
 
-    const handleUpdateHospitalBill = async (e) => {
+    const handleUpdateBurialAssistance = async (e) => {
         e.preventDefault();
     
-        // Get current date-time in yyyy-mm-dd HH:mm:ss format
-        const currentDateTime = new Date().toISOString().slice(0, 19).replace("T", " ");
+        const formData = new FormData();
+        formData.append("burialId", burialId);
+        formData.append("account_id", account_id);
+        formData.append("deceasedFirstName", deceasedFirstName);
+        formData.append("deceasedMiddleName", deceasedMiddleName);
+        formData.append("deceasedLastName", deceasedLastName);
+        formData.append("deceasedExtName", deceasedExtName);
+        formData.append("deceasedPurok", deceasedPurok);
+        formData.append("deceasedBarangay", deceasedBarangay);
+        formData.append("deceasedMunicipality", deceasedMunicipality);
+        formData.append("deceasedProvince", deceasedProvince);
+        formData.append("deceasedGender", deceasedGender);
+        formData.append("deceasedDeathDate", deceasedDeathDate);
+        formData.append("contactPersonFirstname", contactPersonFirstname);
+        formData.append("contactPersonMiddlename", contactPersonMiddlename);
+        formData.append("contactPersonLastname", contactPersonLastname);
+        formData.append("contactPersonExtName", contactPersonExtName);
+        formData.append("contactNumber", contactNumber);
+        formData.append("contactPersonServiceCovered", contactPersonServiceCovered);
+        formData.append("contactPersonFuneralService", contactPersonFuneralService);
+        formData.append("contactPersonEncoded", contactPersonEncoded);
+        formData.append("currentDateTime", new Date().toISOString().slice(0, 19).replace("T", " "));
     
-        console.log("Submitting hospital bill with data:", {
-            burialId, account_id,
-            deceasedFirstName, deceasedMiddleName, deceasedLastName, deceasedExtName, 
-            deceasedPurok, deceasedBarangay, deceasedMunicipality, deceasedProvince, deceasedGender, deceasedDeathDate,
-            contactPersonFirstname, contactPersonMiddlename, contactPersonLastname, contactPersonExtName, 
-            contactPersonServiceCovered, contactPersonFuneralService, contactPersonEncoded
-        });
+        if (deathCertificate) {
+            formData.append("deathCertificate", deathCertificate);
+        }
     
         try {
-            const response = await fetch("http://localhost:5000/update_burial_content", {
+            const response = await fetch("http://localhost:5000/update_burial_assistance", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    burialId, account_id,
-                    deceasedFirstName, deceasedMiddleName, deceasedLastName, deceasedExtName, 
-                    deceasedPurok, deceasedBarangay, deceasedMunicipality, deceasedProvince, deceasedGender, deceasedDeathDate,
-                    contactPersonFirstname, contactPersonMiddlename, contactPersonLastname, contactPersonExtName, 
-                    contactPersonServiceCovered, contactPersonFuneralService, contactPersonEncoded
-                })                
+                body: formData
             });
     
             const data = await response.json();
     
             if (!response.ok) {
-                throw new Error(data.error || "Failed to insert hospital bill.");
+                throw new Error(data.error || "Failed to update burial assistance.");
             }
     
             Swal.fire({
                 icon: "success",
                 title: "Transaction Successful",
-                text: "Hospital bill has been updated successfully!",
-            }); 
-    
+                text: "Burial assistance has been updated successfully!",
+            }).then(() => {
+                /* window.location.reload(); */
+            });
         } catch (err) {
             console.error("Error:", err.message);
             Swal.fire({
                 icon: "error",
                 title: "Transaction Failed",
-                text: err.message || "An error occurred while saving the hospital bill.",
+                text: err.message || "An error occurred while updating burial assistance.",
             });
         }
-    };  */
+    };
+    
 
-    const fetchHospitalBills = async () => {
+    const fetchBurialAssistance = async () => {
         try {
-            const response = await fetch("http://localhost:5000/retrieve_burial_content");
+            const response = await fetch("http://localhost:5000/retrieve_burial_assistance");
             const data = await response.json();
-            setHospitalBills(data);
+            setBurialAssitance(data);
+
+            console.log("Test123", data)
  
         } catch (error) {
             console.error("Error fetching hospital bills:", error);
@@ -210,7 +231,7 @@ function ManageBurialContent(){
     // Handle any real-time updates (for example, using WebSockets or polling)
     useEffect(() => { 
         const interval = setInterval(() => {
-            fetchHospitalBills(); // Refresh the records periodically
+            fetchBurialAssistance(); // Refresh the records periodically
         }, 2000); // Refresh every 5 seconds (you can adjust the time)
 
         return () => clearInterval(interval); // Cleanup interval when the component unmounts
@@ -219,15 +240,15 @@ function ManageBurialContent(){
     // Pagination Logic
     const indexOfLastRecord = currentPage * recordsPerPage;
     const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-    const currentRecords = hospitalBills.slice(indexOfFirstRecord, indexOfLastRecord);
-    const totalPages = Math.ceil(hospitalBills.length / recordsPerPage);
+    const currentRecords = burialAssitance.slice(indexOfFirstRecord, indexOfLastRecord);
+    const totalPages = Math.ceil(burialAssitance.length / recordsPerPage);
 
     // Open modal and set selected bill
-    const handleOpenModal = (bill, editMode = false, modalName) => {
-        setSelectedBill(bill);
+    const handleOpenModal = (burial, editMode = false, modalName) => {
+        setSelectedBurial(burial);
         setIsEditMode(editMode);
         setModalName(modalName);
-        PopulateForms(bill);  
+        PopulateForms(burial);  
     }; 
  
     const handleAddRecord = (editMode = false, modalName) => { 
@@ -236,54 +257,62 @@ function ManageBurialContent(){
         setModalName(modalName)  
     };
  
-    const PopulateForms = (bill) => {
-        console.log("Populating forms with:", bill); // Check all values
-        console.log("Claimant Barangay:", bill['patient_barangay']); // Specifically check this value
-
-        setBurialId(bill['hospital_bill_id']);
-        setPatientFirstName(bill['patient_fname']);
-        setPatientMiddleName(bill['patient_mname']);
-        setPatientLastName(bill['patient_lname']);
-        setPatientExtName(bill['patient_ext_name']); 
-        setPatientPurok(bill['patient_purok']);
-        setPatientBarangay(bill['patient_barangay']);
-        setPatientMunicipality(bill['patient_municipality']);
-        setPatientProvince(bill['patient_province']);
-        setPatientHospital(bill['patient_hospital']);
-        setClaimantFname(bill['claimant_fname']);
-        setClaimantMname(bill['claimant_mname']);
-        setClaimantLname(bill['claimant_lname']);
-        setClaimantExtName(bill['claimant_extname']);
-
-        // ✅ Fix for the select tag issue
-        setClaimantRelationship(bill['claimant_relationship']?.trim() || ""); 
-
-        setClaimantContact(bill['claimant_contact']);
-        setClaimantAmount(bill['claimant_amount']);  
-
-        document.getElementById("relationship").value = bill['claimant_relationship']
-    };
+    const PopulateForms = (burial) => {
+        console.log("Populating forms with:", burial); // Check all values 
+    
+        setBurialId(burial['burial_id']);
+        setDeceasedFirstName(burial['deceased_fname']);
+        setDeceasedMiddleName(burial['deceased_mname']);
+        setDeceasedLastName(burial['deceased_lname']);
+        setDeceasedExtName(burial['deceased_ext_name']); 
+        setDeceasedPurok(burial['deceased_purok']);
+        setDeceasedBarangay(burial['deceased_barangay']);
+        setDeceasedMunicipality(burial['deceased_municipality']);
+        setDeceasedProvince(burial['deceased_province']);
+        setDeceasedGender(burial['deceased_gender']);
+        setDeceasedDeathDate(burial['deceased_deathdate']);
+        setContactPersonFname(burial['contact_fname']);
+        setContactPersonMname(burial['contact_mname']);
+        setContactPersonLname(burial['contact_lname']);
+        setContactPersonExtName(burial['contact_ext_name']);
+        setContactNumber(burial['contact_number']);
+        setContactPersonServiceCovered(burial['contact_service_covered']);
+        setContactPersonFuneralCovered(burial['contact_funeral_service']);
+        setContactPersonEncoded(burial['contact_person_encoded']);
+        
+        // Convert BLOB to Base64 if it's present
+        if (burial['death_certificate']) {
+            const base64String = `data:image/png;base64,${burial['death_certificate']}`;
+            setDeathCertificate(base64String); // Set as image src
+        } else {
+            setDeathCertificate(null);
+        }
+    }; 
+    
 
 
     const ResetForms = () => {
         // ✅ Reset all input fields after successful save
-        setPatientFirstName('');
-        setPatientMiddleName('');
-        setPatientLastName('');
-        setPatientExtName(''); 
-        setPatientPurok('');
-        setPatientBarangay('');
-        setPatientMunicipality('');
-        setPatientProvince('');
-        setPatientHospital('');
-        setClaimantFname('');
-        setClaimantMname('');
-        setClaimantLname('');
-        setClaimantExtName('');
-        setClaimantRelationship('');
-        setClaimantContact('');
-        setClaimantAmount('');
-        
+        setBurialId('');
+        setDeceasedFirstName('');
+        setDeceasedMiddleName('');
+        setDeceasedLastName('');
+        setDeceasedExtName(''); 
+        setDeceasedPurok('');
+        setDeceasedBarangay('');
+        setDeceasedMunicipality('');
+        setDeceasedProvince('');
+        setDeceasedGender('');
+        setDeceasedDeathDate('');
+        setContactPersonFname('');
+        setContactPersonMname('');
+        setContactPersonLname('');
+        setContactPersonExtName('');
+        setContactNumber('');
+        setContactPersonServiceCovered('');
+        setContactPersonFuneralCovered('');
+        setContactPersonEncoded('');
+        setDeathCertificate(null);        
     }  
 
     useEffect(() => {
@@ -441,27 +470,27 @@ function ManageBurialContent(){
                                                             </thead>
                                                             <tbody>
                                                                 {currentRecords.length > 0 ? (
-                                                                    currentRecords.map((bill, index) => (
-                                                                        <tr key={bill.id}>
+                                                                    currentRecords.map((burial, index) => (
+                                                                        <tr key={burial.id}>
                                                                             <td>{indexOfFirstRecord + index + 1}</td>
-                                                                            <td>{`${bill.patient_fname} ${bill.patient_mname} ${bill.patient_lname} ${bill.patient_ext_name || ""}`}</td>
-                                                                            <td>{new Date(bill.datetime_added).toLocaleString()}</td>
-                                                                            <td>{`${bill.claimant_fname} ${bill.claimant_mname} ${bill.claimant_lname} ${bill.claimant_extname || ""}`}</td>
-                                                                            <td>{bill.claimant_contact}</td>
-                                                                            <td>{new Date(bill.datetime_added).toLocaleString()}</td>
+                                                                            <td>{`${burial.deceased_fname} ${burial.deceased_mname} ${burial.deceased_lname} ${burial.deceased_ext_name || ""}`}</td>
+                                                                            <td>{new Date(burial.deceased_deathdate).toLocaleString()}</td>
+                                                                            <td>{`${burial.contact_fname} ${burial.contact_mname} ${burial.contact_lname} ${burial.contact_extname || ""}`}</td>
+                                                                            <td>{burial.contact_number}</td>
+                                                                            <td>{new Date(burial.savedAt).toLocaleString()}</td>
                                                                             <td>
-                                                                                <button className="btn btn-success" onClick={() => handleOpenModal(bill, true, "View")}
+                                                                                <button className="btn btn-success" onClick={() => handleOpenModal(burial, true, "View")}
                                                                                     data-bs-toggle="modal"
                                                                                     data-bs-target="#addHospitalBillModal">
                                                                                     <i className="bi bi-eye"></i> View
                                                                                 </button>
-                                                                                <button className="btn btn-primary" onClick={() => handleOpenModal(bill, true, "Edit")}
+                                                                                <button className="btn btn-primary" onClick={() => handleOpenModal(burial, true, "Edit")}
                                                                                     data-bs-toggle="modal"
                                                                                     data-bs-target="#addHospitalBillModal">
                                                                                     <i className="bi bi-pencil"></i> Edit
                                                                                 </button>
                                                                                 <button className="btn btn-danger" 
-                                                                                    onClick={(e) => handleDeleteHospitalBill(e, bill['hospital_bill_id'])} >
+                                                                                    onClick={(e) => handleDeleteBurialAssistance(e, burial['burial_id'])} >
                                                                                     <i className="bi bi-trash3"></i> Delete
                                                                                 </button>
                                                                             </td>
@@ -524,6 +553,15 @@ function ManageBurialContent(){
                         </div>
                         <div className="modal-body">
                             <form>
+
+                                {deathCertificate && (
+                                    <img 
+                                        src={deathCertificate} 
+                                        alt="Death Certificate" 
+                                        style={{ width: "300px", height: "auto", border: "1px solid #ccc" }} 
+                                    />
+                                )}
+
                                  
                                 <h3>Deceased Information</h3><br />
                                 <div className="row"> 
@@ -534,7 +572,7 @@ function ManageBurialContent(){
                                             className="form-control"
                                             id="firstName"
                                             value={deceasedFirstName}
-                                            onChange={(e) => setDeceasedFirstName(e.target.value.trim())} 
+                                            onChange={(e) => setDeceasedFirstName(e.target.value)} 
                                             placeholder="First Name"
                                         />
                                     </div>
@@ -547,7 +585,7 @@ function ManageBurialContent(){
                                             id="middleName"
                                             placeholder="Middle Name"
                                             value={deceasedMiddleName}
-                                            onChange={(e) => setDeceasedMiddleName(e.target.value.trim())} 
+                                            onChange={(e) => setDeceasedMiddleName(e.target.value)} 
                                         />
                                     </div>
                                     
@@ -559,7 +597,7 @@ function ManageBurialContent(){
                                             id="lastName"
                                             placeholder="Last Name"
                                             value={deceasedLastName}
-                                            onChange={(e) => setDeceasedLastName(e.target.value.trim())} 
+                                            onChange={(e) => setDeceasedLastName(e.target.value)} 
                                         />
                                     </div>
                                     
@@ -571,7 +609,7 @@ function ManageBurialContent(){
                                             id="extName"
                                             value={deceasedExtName}
                                             placeholder="Ext Name"
-                                            onChange={(e) => setDeceasedExtName(e.target.value.trim())} 
+                                            onChange={(e) => setDeceasedExtName(e.target.value)} 
                                         />
                                     </div>    
 
@@ -592,8 +630,8 @@ function ManageBurialContent(){
                                         <label className="form-label">Municipality:</label>
                                         <select
                                             className="form-control"
-                                            value={deceasedMunicipality}
-                                            onChange={setDeceasedMunicipality}
+                                            value={deceasedMunicipality} 
+                                            onChange={handleMunicipalityChange}
                                         >
                                             <option value="">Select Municipality</option>
                                             {Object.keys(municipalityBarangays).map((municipality) => (
@@ -673,8 +711,8 @@ function ManageBurialContent(){
                                         <input
                                             type="file"
                                             className="form-control"
-                                            value={deceasedPurok}
-                                            onChange={(e) => setDeceasedPurok(e.target.value)}
+                                            /* value={deathCertificate} */
+                                            onChange={(e) => setDeathCertificate(e.target.files[0])}
                                         />
                                     </div>
  
@@ -723,6 +761,18 @@ function ManageBurialContent(){
                                             id="extName"
                                             value={contactPersonExtName}
                                             onChange={(e) => setContactPersonExtName(e.target.value)}
+                                        />
+                                    </div>
+                                    
+                                    <div className="col-3">          
+                                        <br />    
+                                        <label htmlFor="extName" className="form-label">Contact Number:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            id="contactNumber"
+                                            value={contactNumber}
+                                            onChange={(e) => setContactNumber(e.target.value)}
                                         />
                                     </div>
 
@@ -809,7 +859,7 @@ function ManageBurialContent(){
                                     { modalName == "Edit" && 
                                         <>
                                             <button type="submit" className="btn btn-primary"
-                                            onClick={handleUpdateHospitalBill}>
+                                            onClick={handleUpdateBurialAssistance}>
                                                 Save
                                             </button> 
                                         </>
