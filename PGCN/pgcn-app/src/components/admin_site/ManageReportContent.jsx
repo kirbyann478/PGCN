@@ -517,7 +517,7 @@ function ManageReportContent(){
                                             className={`btn w-100 ${formPage === "Form 1" ? "btn-secondary" : "btn-success"}`} 
                                             onClick={() => handleFormPageUpdate("Form 1")}
                                         >
-                                            <i className="bi bi-file-earmark-pdf-fill"></i> Form 1
+                                            <i className='bx bxs-file-pdf' ></i> Form 1
                                         </button>
                                     </div>
 
@@ -527,7 +527,7 @@ function ManageReportContent(){
                                             className={`btn w-100 ${formPage === "Form 2" ? "btn-secondary" : "btn-success"}`} 
                                             onClick={() => handleFormPageUpdate("Form 2")}
                                         >
-                                            <i className="bi bi-file-earmark-pdf-fill"></i> Form 2
+                                            <i className='bx bxs-file-pdf' ></i> Form 2
                                         </button>
                                     </div>
 
@@ -537,7 +537,7 @@ function ManageReportContent(){
                                             className={`btn w-100 ${formPage === "Form 3" ? "btn-secondary" : "btn-success"}`} 
                                             onClick={() => handleFormPageUpdate("Form 3")}
                                         >
-                                            <i className="bi bi-file-earmark-pdf-fill"></i> Form 3
+                                            <i className='bx bxs-file-pdf' ></i> Form 3
                                         </button>
                                     </div>
 
@@ -557,7 +557,7 @@ function ManageReportContent(){
                                                 className={`btn w-500  btn-secondary`}  
                                                 onClick={handleDownload}
                                             >
-                                                <i className="bi bi-file-earmark-pdf-fill"></i> Download
+                                                <i className='bx bxs-file-pdf' ></i> Download
                                             </button>
                                         </div><br />
 

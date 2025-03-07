@@ -26,6 +26,8 @@ function ManageBurialContent(){
     const [deceasedGender, setDeceasedGender] = useState('');
     const [deceasedDeathDate, setDeceasedDeathDate] = useState('');
     const [deathCertificate, setDeathCertificate] = useState(null);
+    const [deathCertificatePreview, setDeathCertificatePreview] = useState(null);
+
 
     const [contactPersonFirstname, setContactPersonFname] = useState('');
     const [contactPersonMiddlename, setContactPersonMname] = useState('');
@@ -35,6 +37,15 @@ function ManageBurialContent(){
     const [contactPersonServiceCovered, setContactPersonServiceCovered] = useState('');
     const [contactPersonFuneralService, setContactPersonFuneralCovered] = useState('');
     const [contactPersonEncoded, setContactPersonEncoded] = useState('');
+    
+    const [burialStatus, setBurialStatus] = useState('');
+    const [checkedItems, setCheckedItems] = useState({
+        barangayIndigency: null,
+        deathCertificate: null,
+        funeralContract: null,
+        validId: null
+    });
+    const [remarks, setRemarks] = useState('');
     // Variables for inputs ------------------------------------------------------------
 
     // Variables for hospital bills -------------------------------
@@ -50,11 +61,40 @@ function ManageBurialContent(){
     const [isEditMode, setIsEditMode] = useState(false);
     const [modalName, setModalName] = useState();
     // Variables for pagination -------------------------------
+    
+    const [formPage, setFormPage] = useState("Basic Information");
 
     const handleAddHospitalBill = async (e) => {
         e.preventDefault();
+
+        console.log("Test Add: ", 
+            {
+                account_id: account_id,
+                deceasedFirstName: deceasedFirstName,
+                deceasedMiddleName: deceasedMiddleName,
+                deceasedLastName: deceasedLastName,
+                deceasedExtName: deceasedExtName,
+                deceasedPurok: deceasedPurok,
+                deceasedBarangay: deceasedBarangay,
+                deceasedMunicipality: deceasedMunicipality,
+                deceasedProvince: deceasedProvince,
+                deceasedGender: deceasedGender,
+                deceasedDeathDate: deceasedDeathDate,
+                contactPersonFirstname: contactPersonFirstname,
+                contactPersonMiddlename: contactPersonMiddlename,
+                contactPersonLastname: contactPersonLastname,
+                contactPersonExtName: contactPersonExtName,
+                contactNumber: contactNumber,
+                contactPersonServiceCovered: contactPersonFuneralService,
+                contactPersonFuneralService: contactPersonFuneralService,
+                contactPersonEncoded: contactPersonEncoded,
+                burialStatus: burialStatus,
+                checkedItems: checkedItems,
+                remarks: remarks
+            }
+        )
     
-        const formData = new FormData();
+        /* const formData = new FormData();
         formData.append("account_id", account_id);
         formData.append("deceasedFirstName", deceasedFirstName);
         formData.append("deceasedMiddleName", deceasedMiddleName);
@@ -108,7 +148,7 @@ function ManageBurialContent(){
                 title: "Transaction Failed",
                 text: err.message || "An error occurred while saving the hospital bill.",
             });
-        }
+        } */
     };
     
 
@@ -284,8 +324,10 @@ function ManageBurialContent(){
         if (burial['death_certificate']) {
             const base64String = `data:image/png;base64,${burial['death_certificate']}`;
             setDeathCertificate(base64String); // Set as image src
+            setDeathCertificatePreview(base64String);
         } else {
             setDeathCertificate(null);
+            setDeathCertificatePreview(null);
         }
     }; 
     
@@ -395,7 +437,30 @@ function ManageBurialContent(){
         setDeceasedBarangay(''); // Reset barangay selection
         setBarangayList(municipalityBarangays[selectedMunicipality] || []);
     };  
+ 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setDeathCertificate(file);
+            setDeathCertificatePreview(URL.createObjectURL(file)); // Generate preview
+        } else {
+            setDeathCertificate(null);
+            setDeathCertificatePreview(null);
+        }
+    };
     
+    const handleFormPageUpdate = (formPageNumber) => {
+        setFormPage(formPageNumber);
+    }
+
+    const handleCheckboxChange = (event) => {
+        const { id, checked } = event.target;
+        setCheckedItems((prevState) => ({
+            ...prevState,
+            [id]: checked
+        }));
+    };
+
     return(
         <>
             <main id="main" className="main">
@@ -482,16 +547,16 @@ function ManageBurialContent(){
                                                                                 <button className="btn btn-success" onClick={() => handleOpenModal(burial, true, "View")}
                                                                                     data-bs-toggle="modal"
                                                                                     data-bs-target="#addHospitalBillModal">
-                                                                                    <i className="bi bi-eye"></i> View
+                                                                                    <i className='bx bx-info-circle' ></i> View
                                                                                 </button>
                                                                                 <button className="btn btn-primary" onClick={() => handleOpenModal(burial, true, "Edit")}
                                                                                     data-bs-toggle="modal"
                                                                                     data-bs-target="#addHospitalBillModal">
-                                                                                    <i className="bi bi-pencil"></i> Edit
+                                                                                    <i className='bx bx-edit' ></i> Edit
                                                                                 </button>
                                                                                 <button className="btn btn-danger" 
                                                                                     onClick={(e) => handleDeleteBurialAssistance(e, burial['burial_id'])} >
-                                                                                    <i className="bi bi-trash3"></i> Delete
+                                                                                    <i className='bx bx-trash' ></i> Delete
                                                                                 </button>
                                                                             </td>
                                                                         </tr>
@@ -554,317 +619,446 @@ function ManageBurialContent(){
                         <div className="modal-body">
                             <form>
 
-                                {deathCertificate && (
-                                    <img 
-                                        src={deathCertificate} 
-                                        alt="Death Certificate" 
-                                        style={{ width: "300px", height: "auto", border: "1px solid #ccc" }} 
-                                    />
-                                )}
-
-                                 
-                                <h3>Deceased Information</h3><br />
-                                <div className="row"> 
-                                    <div className="col-3">               
-                                        <label htmlFor="firstName" className="form-label">First Name:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="firstName"
-                                            value={deceasedFirstName}
-                                            onChange={(e) => setDeceasedFirstName(e.target.value)} 
-                                            placeholder="First Name"
-                                        />
-                                    </div>
-
-                                    <div className="col-3"> 
-                                        <label htmlFor="middleName" className="form-label">Middle Name:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="middleName"
-                                            placeholder="Middle Name"
-                                            value={deceasedMiddleName}
-                                            onChange={(e) => setDeceasedMiddleName(e.target.value)} 
-                                        />
-                                    </div>
+                                <div className="generateContainer">
                                     
-                                    <div className="col-3"> 
-                                        <label htmlFor="lastName" className="form-label">Last Name:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="lastName"
-                                            placeholder="Last Name"
-                                            value={deceasedLastName}
-                                            onChange={(e) => setDeceasedLastName(e.target.value)} 
-                                        />
-                                    </div>
-                                    
-                                    <div className="col-3"> 
-                                        <label htmlFor="extName" className="form-label">Ext Name:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="extName"
-                                            value={deceasedExtName}
-                                            placeholder="Ext Name"
-                                            onChange={(e) => setDeceasedExtName(e.target.value)} 
-                                        />
-                                    </div>    
+                                    <h5>Select Section: </h5>
+                                    <br />
+                                    <div className="row">  
+                                        <div className="col-6">
+                                            <button 
+                                                type="button" 
+                                                className={`btn w-100 ${formPage === "Basic Information" ? "btn-secondary" : "btn-success"}`} 
+                                                onClick={() => handleFormPageUpdate("Basic Information")}
+                                            >
+                                                <i class="bi bi-person-vcard"></i> Basic Information
+                                            </button>
+                                        </div>
 
-                                    <div className="col-3">
-                                        <br />
-                                        <label className="form-label">Province:</label>
-                                        <select
-                                            className="form-control"
-                                            value={deceasedProvince}
-                                            disabled
-                                        >
-                                            <option value="Camarines Norte">Camarines Norte</option>
-                                        </select>
-                                    </div>
- 
-                                    <div className="col-3">
-                                        <br />
-                                        <label className="form-label">Municipality:</label>
-                                        <select
-                                            className="form-control"
-                                            value={deceasedMunicipality} 
-                                            onChange={handleMunicipalityChange}
-                                        >
-                                            <option value="">Select Municipality</option>
-                                            {Object.keys(municipalityBarangays).map((municipality) => (
-                                                <option key={municipality} value={municipality}>
-                                                    {municipality}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
- 
-                                    <div className="col-3">
-                                        <br />
-                                        <label className="form-label">Barangay:</label>
-                                        <select
-                                            className="form-control"
-                                            value={deceasedBarangay}
-                                            onChange={(e) => setDeceasedBarangay(e.target.value.trim())}
-                                            disabled={barangayList.length === 0}
-                                        >
-                                            <option value="">Select Barangay</option>
-                                            {barangayList.map((barangay) => (
-                                                <option key={barangay} value={barangay}>
-                                                    {barangay}
-                                                </option>
-                                            ))} : {
-                                                <option key={deceasedBarangay} value={deceasedBarangay}>
-                                                    {deceasedBarangay}
-                                                </option>
-                                            }
-                                
-                                        </select>
-                                    </div>
- 
-                                    <div className="col-3">
-                                        <br />
-                                        <label className="form-label">Purok:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            value={deceasedPurok}
-                                            onChange={(e) => setDeceasedPurok(e.target.value)}
-                                        />
-                                    </div>   
+                                        <div className="col-6">
+                                            <button 
+                                                type="button" 
+                                                className={`btn w-100 ${formPage === "Checklist" ? "btn-secondary" : "btn-success"}`} 
+                                                onClick={() => handleFormPageUpdate("Checklist")}
+                                            >
+                                                <i class="bi bi-card-checklist"></i> Checklist
+                                            </button>
+                                        </div> 
+    
 
-                                    
-                                    <div className="col-3">
-                                        <br /> 
-                                        <label htmlFor="extName" className="form-label">Gender:</label>
-                                           
-                                        <select
-                                            className="form-control"
-                                            id="hospital"   
-                                            value={deceasedGender}
-                                            onChange={(e) => setDeceasedGender(e.target.value)} >
-                                                <option value="">Select Gender</option> 
-                                                <option value="Male">Male</option> 
-                                                <option value="Female">Female</option> 
-                                        </select>
-                                    </div>
-
-                                    <div className="col-3">
-                                        <br /> 
-                                        <label htmlFor="extName" className="form-label">Death of Death:</label>
-                                         
-                                        <input
-                                            type="date"
-                                            className="form-control"
-                                            value={deceasedDeathDate}
-                                            onChange={(e) => setDeceasedDeathDate(e.target.value)}
-                                        />
-                                    </div>
-                                    
-                                    <div className="col-6">
-                                        <br /> 
-                                        <label htmlFor="extName" className="form-label">Date Certificate:</label>
-                                         
-                                        <input
-                                            type="file"
-                                            className="form-control"
-                                            /* value={deathCertificate} */
-                                            onChange={(e) => setDeathCertificate(e.target.files[0])}
-                                        />
-                                    </div>
- 
+                                    </div>  
                                 </div> 
-                                <br />  
-                                <h3>Contact Person</h3><br />
-                                <div className="row">
-                                    <div className="col-3"> 
-                                        <label htmlFor="firstName" className="form-label">First Name:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="firstName"
-                                            value={contactPersonFirstname}
-                                            onChange={(e) => setContactPersonFname(e.target.value)} 
-                                        />
-                                    </div>
 
-                                    <div className="col-3"> 
-                                        <label htmlFor="middleName" className="form-label">Middle Name:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="middleName"
-                                            value={contactPersonMiddlename}
-                                            onChange={(e) => setContactPersonMname(e.target.value)} 
-                                        />
-                                    </div>
-                                    
-                                    <div className="col-3"> 
-                                        <label htmlFor="lastName" className="form-label">Last Name:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="lastName"
-                                            value={contactPersonLastname}
-                                            onChange={(e) => setContactPersonLname(e.target.value)}
-                                        />
-                                    </div>
-                                    
-                                    <div className="col-3">              
-                                        <label htmlFor="extName" className="form-label">Ext Name:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="extName"
-                                            value={contactPersonExtName}
-                                            onChange={(e) => setContactPersonExtName(e.target.value)}
-                                        />
-                                    </div>
-                                    
-                                    <div className="col-3">          
-                                        <br />    
-                                        <label htmlFor="extName" className="form-label">Contact Number:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="contactNumber"
-                                            value={contactNumber}
-                                            onChange={(e) => setContactNumber(e.target.value)}
-                                        />
-                                    </div>
+                                <div className="generateContainer">
+                                        
+                                    { formPage == "Basic Information" && 
+                                        <>
 
-                                    
-                                    <div className="col-3">
-                                        <br />
-                                        <label htmlFor="relationship" className="form-label">Service Covered:</label>
-                                        <select
-                                            className="form-control"
-                                            id="relationship"
-                                            value={contactPersonServiceCovered}
-                                            onChange={(e) => setContactPersonServiceCovered(e.target.value)}
-                                        >
-                                            <option value="">Select Service Covered</option>
-                                            <option value="Full Service">Full Service</option>
-                                            <option value="Viewing">Viewing</option> 
-                                        </select>
-                                    </div>
-                                    
-                                    <div className="col-3">
-                                        <br />
-                                        <label htmlFor="relationship" className="form-label">Funeral Service:</label>
-                                        <select
-                                            className="form-control"
-                                            id="relationship"
-                                            value={contactPersonFuneralService}
-                                            onChange={(e) => setContactPersonFuneralCovered(e.target.value)}
-                                        >
-                                            <option value="">Select Funeral Service</option>
-                                            <option value="SAAVEDRA FUNERAL">SAAVEDRA FUNERAL</option>
-                                            <option value="ARANA FUNERAL">ARANA FUNERAL</option>
-                                            <option value="BELMONTE DAET">BELMONTE DAET</option>
-                                            <option value="ADEA OF JOSE PANGANIBAN">ADEA OF JOSE PANGANIBAN</option>
-                                            <option value="ST RAPHAEL FUNERARIA">ST RAPHAEL FUNERARIA</option>  
-                                        </select>
-                                    </div>
-                                    
-                                    <div className="col-3">
-                                        <br />
-                                        <label htmlFor="relationship" className="form-label">ENCODED/REVIEWED BY:</label>
-                                        <select
-                                            className="form-control"
-                                            id="relationship"
-                                            value={contactPersonEncoded}
-                                            onChange={(e) => setContactPersonEncoded(e.target.value)}
-                                        >
-                                            <option value="">Select Encoded/Reviewed By:</option>
-                                            <option value="DENNIS">DENNIS</option>
-                                            <option value="JAYSON OF GSO SE">JAYSON OF GSO SE</option>
-                                            <option value="LARRY CASTRO">LARRY CASTRO</option>
-                                            <option value="ROBERT PARIS">ROBERT PARIS</option>
-                                            <option value="REYNNIER VINLUAN">REYNNIER VINLUAN</option>
-                                            <option value="OWEN ABANTO">OWEN ABANTO</option>
-                                            <option value="CHRIS CAMA">CHRIS CAMA</option>
-                                            <option value="MARI MAR">MARI MAR</option>
-                                            <option value="DAVE BUITRE">DAVE BUITRE</option>
-                                            <option value="MARY GRACE MAGANA">MARY GRACE MAGANA</option>
-                                            <option value="DAYANG TALAVERA">DAYANG TALAVERA</option>  
-                                        </select>
-                                    </div>
+                                            <h3>Deceased Information</h3><br />
+                                            <div className="row"> 
+                                                <div className="col-3">               
+                                                    <label htmlFor="firstName" className="form-label">First Name:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="firstName"
+                                                        value={deceasedFirstName}
+                                                        onChange={(e) => setDeceasedFirstName(e.target.value)} 
+                                                        placeholder="First Name"
+                                                    />
+                                                </div>
+
+                                                <div className="col-3"> 
+                                                    <label htmlFor="middleName" className="form-label">Middle Name:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="middleName"
+                                                        placeholder="Middle Name"
+                                                        value={deceasedMiddleName}
+                                                        onChange={(e) => setDeceasedMiddleName(e.target.value)} 
+                                                    />
+                                                </div>
+                                                
+                                                <div className="col-3"> 
+                                                    <label htmlFor="lastName" className="form-label">Last Name:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="lastName"
+                                                        placeholder="Last Name"
+                                                        value={deceasedLastName}
+                                                        onChange={(e) => setDeceasedLastName(e.target.value)} 
+                                                    />
+                                                </div>
+                                                
+                                                <div className="col-3"> 
+                                                    <label htmlFor="extName" className="form-label">Ext Name:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="extName"
+                                                        value={deceasedExtName}
+                                                        placeholder="Ext Name"
+                                                        onChange={(e) => setDeceasedExtName(e.target.value)} 
+                                                    />
+                                                </div>    
+
+                                                <div className="col-3">
+                                                    <br />
+                                                    <label className="form-label">Province:</label>
+                                                    <select
+                                                        className="form-control"
+                                                        value={deceasedProvince}
+                                                        disabled
+                                                    >
+                                                        <option value="Camarines Norte">Camarines Norte</option>
+                                                    </select>
+                                                </div>
+            
+                                                <div className="col-3">
+                                                    <br />
+                                                    <label className="form-label">Municipality:</label>
+                                                    <select
+                                                        className="form-control"
+                                                        value={deceasedMunicipality} 
+                                                        onChange={handleMunicipalityChange}
+                                                    >
+                                                        <option value="">Select Municipality</option>
+                                                        {Object.keys(municipalityBarangays).map((municipality) => (
+                                                            <option key={municipality} value={municipality}>
+                                                                {municipality}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+            
+                                                <div className="col-3">
+                                                    <br />
+                                                    <label className="form-label">Barangay:</label>
+                                                    <select
+                                                        className="form-control"
+                                                        value={deceasedBarangay}
+                                                        onChange={(e) => setDeceasedBarangay(e.target.value.trim())}
+                                                        disabled={barangayList.length === 0}
+                                                    >
+                                                        <option value="">Select Barangay</option>
+                                                        {barangayList.map((barangay) => (
+                                                            <option key={barangay} value={barangay}>
+                                                                {barangay}
+                                                            </option>
+                                                        ))} : {
+                                                            <option key={deceasedBarangay} value={deceasedBarangay}>
+                                                                {deceasedBarangay}
+                                                            </option>
+                                                        }
+                                            
+                                                    </select>
+                                                </div>
+            
+                                                <div className="col-3">
+                                                    <br />
+                                                    <label className="form-label">Purok:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        value={deceasedPurok}
+                                                        onChange={(e) => setDeceasedPurok(e.target.value)}
+                                                    />
+                                                </div>   
+
+                                                
+                                                <div className="col-3">
+                                                    <br /> 
+                                                    <label htmlFor="extName" className="form-label">Gender:</label>
+                                                    
+                                                    <select
+                                                        className="form-control"
+                                                        id="hospital"   
+                                                        value={deceasedGender}
+                                                        onChange={(e) => setDeceasedGender(e.target.value)} >
+                                                            <option value="">Select Gender</option> 
+                                                            <option value="Male">Male</option> 
+                                                            <option value="Female">Female</option> 
+                                                    </select>
+                                                </div>
+
+                                                <div className="col-3">
+                                                    <br /> 
+                                                    <label htmlFor="extName" className="form-label">Death of Death:</label>
+                                                    
+                                                    <input
+                                                        type="date"
+                                                        className="form-control"
+                                                        value={deceasedDeathDate}
+                                                        onChange={(e) => setDeceasedDeathDate(e.target.value)}
+                                                    />
+                                                </div>
+                                                
+                                                <div className="col-6">
+                                                    <br /> 
+                                                    <label htmlFor="extName" className="form-label">Date Certificate:</label>
+                                                    
+                                                    <input
+                                                        type="file"
+                                                        className="form-control"
+                                                        /* value={deathCertificate} */
+                                                        /* onChange={(e) => setDeathCertificate(e.target.files[0])} */
+
+                                                        accept="image/*"
+                                                        onChange={handleFileChange} 
+                                                    />
+                                                </div>
+
+                                                {/* {deathCertificate && (
+                                                    <div className="col-12">
+                                                        <br />
+                                                            <img 
+                                                                src={deathCertificate} 
+                                                                alt="Death Certificate" 
+                                                                style={{ width: "300px", height: "auto", border: "1px solid #ccc" }} 
+                                                            />
+                                                    </div>
+                                                )} */}
+
+                                                {/* Display the preview dynamically */}
+                                                {deathCertificatePreview && (
+                                                    <div className="col-12">
+                                                        <br />
+                                                        <img 
+                                                            src={deathCertificatePreview} 
+                                                            alt="Death Certificate Preview" 
+                                                            style={{ width: "300px", height: "auto", border: "1px solid #ccc" }} 
+                                                        />
+                                                    </div>
+                                                )}
+            
+                                            </div> 
+                                            <br />  
+                                            <h3>Contact Person</h3><br />
+                                            <div className="row">
+                                                <div className="col-3"> 
+                                                    <label htmlFor="firstName" className="form-label">First Name:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="firstName"
+                                                        value={contactPersonFirstname}
+                                                        onChange={(e) => setContactPersonFname(e.target.value)} 
+                                                    />
+                                                </div>
+
+                                                <div className="col-3"> 
+                                                    <label htmlFor="middleName" className="form-label">Middle Name:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="middleName"
+                                                        value={contactPersonMiddlename}
+                                                        onChange={(e) => setContactPersonMname(e.target.value)} 
+                                                    />
+                                                </div>
+                                                
+                                                <div className="col-3"> 
+                                                    <label htmlFor="lastName" className="form-label">Last Name:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="lastName"
+                                                        value={contactPersonLastname}
+                                                        onChange={(e) => setContactPersonLname(e.target.value)}
+                                                    />
+                                                </div>
+                                                
+                                                <div className="col-3">              
+                                                    <label htmlFor="extName" className="form-label">Ext Name:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="extName"
+                                                        value={contactPersonExtName}
+                                                        onChange={(e) => setContactPersonExtName(e.target.value)}
+                                                    />
+                                                </div>
+                                                
+                                                <div className="col-3">          
+                                                    <br />    
+                                                    <label htmlFor="extName" className="form-label">Contact Number:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="contactNumber"
+                                                        value={contactNumber}
+                                                        onChange={(e) => setContactNumber(e.target.value)}
+                                                    />
+                                                </div>
+
+                                                
+                                                <div className="col-3">
+                                                    <br />
+                                                    <label htmlFor="relationship" className="form-label">Service Covered:</label>
+                                                    <select
+                                                        className="form-control"
+                                                        id="relationship"
+                                                        value={contactPersonServiceCovered}
+                                                        onChange={(e) => setContactPersonServiceCovered(e.target.value)}
+                                                    >
+                                                        <option value="">Select Service Covered</option>
+                                                        <option value="Full Service">Full Service</option>
+                                                        <option value="Viewing">Viewing</option> 
+                                                    </select>
+                                                </div>
+                                                
+                                                <div className="col-3">
+                                                    <br />
+                                                    <label htmlFor="relationship" className="form-label">Funeral Service:</label>
+                                                    <select
+                                                        className="form-control"
+                                                        id="relationship"
+                                                        value={contactPersonFuneralService}
+                                                        onChange={(e) => setContactPersonFuneralCovered(e.target.value)}
+                                                    >
+                                                        <option value="">Select Funeral Service</option>
+                                                        <option value="SAAVEDRA FUNERAL">SAAVEDRA FUNERAL</option>
+                                                        <option value="ARANA FUNERAL">ARANA FUNERAL</option>
+                                                        <option value="BELMONTE DAET">BELMONTE DAET</option>
+                                                        <option value="ADEA OF JOSE PANGANIBAN">ADEA OF JOSE PANGANIBAN</option>
+                                                        <option value="ST RAPHAEL FUNERARIA">ST RAPHAEL FUNERARIA</option>  
+                                                    </select>
+                                                </div>
+                                                
+                                                <div className="col-3">
+                                                    <br />
+                                                    <label htmlFor="relationship" className="form-label">ENCODED/REVIEWED BY:</label>
+                                                    <select
+                                                        className="form-control"
+                                                        id="relationship"
+                                                        value={contactPersonEncoded}
+                                                        onChange={(e) => setContactPersonEncoded(e.target.value)}
+                                                    >
+                                                        <option value="">Select Encoded/Reviewed By:</option>
+                                                        <option value="DENNIS">DENNIS</option>
+                                                        <option value="JAYSON OF GSO SE">JAYSON OF GSO SE</option>
+                                                        <option value="LARRY CASTRO">LARRY CASTRO</option>
+                                                        <option value="ROBERT PARIS">ROBERT PARIS</option>
+                                                        <option value="REYNNIER VINLUAN">REYNNIER VINLUAN</option>
+                                                        <option value="OWEN ABANTO">OWEN ABANTO</option>
+                                                        <option value="CHRIS CAMA">CHRIS CAMA</option>
+                                                        <option value="MARI MAR">MARI MAR</option>
+                                                        <option value="DAVE BUITRE">DAVE BUITRE</option>
+                                                        <option value="MARY GRACE MAGANA">MARY GRACE MAGANA</option>
+                                                        <option value="DAYANG TALAVERA">DAYANG TALAVERA</option>  
+                                                    </select>
+                                                </div>
+            
+                                                
+                                                
+                                            </div>
+
+                                            <br />
+                                        
+                                        </>
+                                    }
+                                        
+                                    {formPage === "Checklist" && (
+                                        <> 
+                                            <div className="row"> 
+                                                <div className="col-12">
+                                                    <div className="formContainer">
+                                                        <h3>Burial Status: </h3><br/>
+                                                        <p>Current Status: <b>Pending</b></p><br/>  
  
-                                     
+                                                        <select
+                                                            className="form-control"
+                                                            id="relationship"
+                                                            value={burialStatus}
+                                                            onChange={(e) => setBurialStatus(e.target.value)}
+                                                        >
+                                                            <option value="">Select burial status:</option>
+                                                            <option value="Pending">Pending</option>
+                                                            <option value="Pending">Completed</option>
+                                                            <option value="Cancelled">Cancelled</option> 
+                                                        </select>
+
+                                                    </div>
+                                                    <br/>
+                                                </div>
+                                                
+                                                <div className="col-12">  
+                                                    <div className="formContainer">
+                                                        <h3>Requirements Checklist:</h3>             
+                                                        <br/>
+                                                        <ul className="list-group">
+                                                            <li className="list-group-item">
+                                                                <input className="form-check-input me-1" type="checkbox" id="checkBarangayIndigency" 
+                                                                    checked={checkedItems.barangayIndigency}
+                                                                    onChange={handleCheckboxChange}/>
+                                                                <label className="form-check-label" htmlFor="barangayIndigency">&nbsp; Barangay Indigency (2 Original)</label>
+                                                            </li>
+                                                            <li className="list-group-item">
+                                                                <input className="form-check-input me-1" type="checkbox" id="checkDeathCertificate" 
+                                                                    checked={checkedItems.deathCertificate}
+                                                                    onChange={handleCheckboxChange}/>
+                                                                <label className="form-check-label" htmlFor="checkDeathCertificate">&nbsp; Death Certificate (2 Copies)</label>
+                                                            </li>
+                                                            <li className="list-group-item">
+                                                                <input className="form-check-input me-1" type="checkbox" id="checkFuneralContract" 
+                                                                    checked={checkedItems.funeralContract}
+                                                                    onChange={handleCheckboxChange}/>
+                                                                <label className="form-check-label" htmlFor="checkFuneralContract">&nbsp; Funeral Contract (2 Copies)</label>
+                                                            </li>
+                                                            <li className="list-group-item">
+                                                                <input className="form-check-input me-1" type="checkbox" id="checkValidId" 
+                                                                    checked={checkedItems.validId}
+                                                                    onChange={handleCheckboxChange}/>
+                                                                <label className="form-check-label" htmlFor="checkValidId">&nbsp; Valid Identification (2 Copies)</label>
+                                                            </li>
+                                                        </ul>
+                                                    </div> 
+                                                </div>
+                                                
+                                                <div className="col-12">
+                                                    <br/>
+                                                    <div className="formContainer">
+                                                        <h3>Remarks:</h3>             
+                                                        <br/>
+
+                                                        <textarea className="form-control" id="remarks" placeholder="Enter your remarks here" rows={5}
+                                                            value={remarks}
+                                                            onChange={(e) => setRemarks(e.target.value)} > 
+                                                        </textarea>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                    
+                                    <div className="modal-footer">
+                                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
+                                            Close
+                                        </button>
+
+                                        { modalName == "Add" && 
+                                            <>
+                                                <button type="submit" className="btn btn-primary"
+                                                onClick={handleAddHospitalBill}>
+                                                    Save
+                                                </button> 
+                                            </>
+                                        }
+
+                                        { modalName == "Edit" && 
+                                            <>
+                                                <button type="submit" className="btn btn-primary"
+                                                onClick={handleUpdateBurialAssistance}>
+                                                    Save
+                                                </button> 
+                                            </>
+                                        }
+                                    </div>
                                     
                                 </div>
 
-                                <br />
-
-
-                                
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
-                                        Close
-                                    </button>
-
-                                    { modalName == "Add" && 
-                                        <>
-                                            <button type="submit" className="btn btn-primary"
-                                            onClick={handleAddHospitalBill}>
-                                                Save
-                                            </button> 
-                                        </>
-                                    }
-
-                                    { modalName == "Edit" && 
-                                        <>
-                                            <button type="submit" className="btn btn-primary"
-                                            onClick={handleUpdateBurialAssistance}>
-                                                Save
-                                            </button> 
-                                        </>
-                                    }
-                                </div>
                             </form>
                         </div>
                     </div>

@@ -445,16 +445,16 @@ function ManageHospitalBillContent(){
                                                                                 <button className="btn btn-success" onClick={() => handleOpenModal(bill, true, "View")}
                                                                                     data-bs-toggle="modal"
                                                                                     data-bs-target="#addHospitalBillModal">
-                                                                                    <i className="bi bi-eye"></i> View
+                                                                                    <i className='bx bx-info-circle' ></i> View
                                                                                 </button>
                                                                                 <button className="btn btn-primary" onClick={() => handleOpenModal(bill, true, "Edit")}
                                                                                     data-bs-toggle="modal"
                                                                                     data-bs-target="#addHospitalBillModal">
-                                                                                    <i className="bi bi-pencil"></i> Edit
+                                                                                    <i className='bx bx-edit' ></i> Edit
                                                                                 </button>
                                                                                 <button className="btn btn-danger" 
                                                                                     onClick={(e) => handleDeleteHospitalBill(e, bill['hospital_bill_id'])} >
-                                                                                    <i className="bi bi-trash3"></i> Delete
+                                                                                    <i className='bx bx-trash' ></i> Delete
                                                                                 </button>
                                                                             </td>
                                                                         </tr>

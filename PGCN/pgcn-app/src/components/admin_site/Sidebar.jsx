@@ -67,7 +67,7 @@ function Sidebar({ isVisible }) {
                                 id="dashboard"
                                 to="/admin/dashboard" // Use 'to' instead of 'href'
                             >
-                                <i className="bi bi-grid"></i>
+                                <i className='bx bxs-dashboard' ></i>
                                 <span>Dashboard</span>
                             </Link>
                         </li>
@@ -81,7 +81,8 @@ function Sidebar({ isVisible }) {
                                 id="dashboard"
                                 to="/admin/hospital_bill" // Use 'to' instead of 'href'
                             >
-                                <i className="bi bi-briefcase-fill"></i>
+                                {/* <i className="bi bi-briefcase-fill"></i> */}
+                                <i className='bx bxs-briefcase' ></i>
                                 <span>Hospital Bill</span>
                             </Link>
                         </li>
@@ -92,7 +93,8 @@ function Sidebar({ isVisible }) {
                                 id="dashboard"
                                 to="/admin/manage_burial" // Use 'to' instead of 'href'
                             >
-                                <i className="bi bi-briefcase-fill"></i>
+                                {/* <i className="bi bi-briefcase-fill"></i> */}
+                                <i className='bx bxs-briefcase' ></i>
                                 <span>Burial Assistance</span>
                             </Link>
                         </li> 
@@ -105,8 +107,8 @@ function Sidebar({ isVisible }) {
                                 className={`nav-link ${isActive('/admin/manage_report') ? '' : 'collapsed'}`}
                                 id="dashboard"
                                 to="/admin/manage_report" // Use 'to' instead of 'href'
-                            >
-                                <i className="bi bi-reception-4"></i>
+                            > 
+                                <i className='bx bxs-report' ></i>
                                 <span>Generate Reports</span>
                             </Link>
                         </li> 
@@ -117,7 +119,7 @@ function Sidebar({ isVisible }) {
                                 id="dashboard"
                                 to="/admin/report_statistics" // Use 'to' instead of 'href'
                             >
-                                <i class='bx bx-line-chart'></i>
+                                <i className='bx bx-line-chart'></i>
                                 <span>Reports and Statistics</span>
                             </Link>
                         </li> 
@@ -131,7 +133,7 @@ function Sidebar({ isVisible }) {
                                 id="dashboard"
                                 to="/admin/dashboard" // Use 'to' instead of 'href'
                             >
-                                <i className="bi bi-people-fill"></i>
+                                <i className='bx bxs-user-account' ></i>
                                 <span>Manage User Accounts</span>
                             </Link>
                         </li> 
@@ -143,7 +145,7 @@ function Sidebar({ isVisible }) {
                                 onClick={handleLogout} 
                                 style={{ border: "none", background: "none", cursor: "pointer" }}
                             >
-                                <i className="bi bi-box-arrow-right"></i>
+                                <i className='bx bx-log-out' ></i>
                                 <span>Logout</span>
                             </Link>
                         </li>
