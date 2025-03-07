@@ -419,7 +419,9 @@ app.post("/insert_burial_assistance", upload.single("deathCertificate"), (req, r
         deceasedFirstName, deceasedMiddleName, deceasedLastName, deceasedExtName, 
         deceasedPurok, deceasedBarangay, deceasedMunicipality, deceasedProvince, deceasedGender, deceasedDeathDate, 
         contactPersonFirstname, contactPersonMiddlename, contactPersonLastname, contactPersonExtName, contactNumber,
-        contactPersonServiceCovered, contactPersonFuneralService, contactPersonEncoded, currentDateTime
+        contactPersonServiceCovered, contactPersonFuneralService, contactPersonEncoded, 
+        burialStatus, barangayIndigency, checkDeathCertificate, funeralContract, validId, remarks,
+        currentDateTime
     } = req.body;  
 
     const deathCertificate = req.file ? req.file.buffer : null; // Convert file to buffer

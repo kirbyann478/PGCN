@@ -94,7 +94,7 @@ function ManageBurialContent(){
             }
         )
     
-        /* const formData = new FormData();
+        const formData = new FormData();
         formData.append("account_id", account_id);
         formData.append("deceasedFirstName", deceasedFirstName);
         formData.append("deceasedMiddleName", deceasedMiddleName);
@@ -113,7 +113,12 @@ function ManageBurialContent(){
         formData.append("contactNumber", contactNumber);
         formData.append("contactPersonServiceCovered", contactPersonServiceCovered);
         formData.append("contactPersonFuneralService", contactPersonFuneralService);
-        formData.append("contactPersonEncoded", contactPersonEncoded);
+        formData.append("burialStatus", burialStatus);
+        formData.append("barangayIndigency", checkedItems.barangayIndigency);
+        formData.append("deathCertificate", checkedItems.deathCertificate);
+        formData.append("funeralContract", checkedItems.funeralContract);
+        formData.append("validId", checkedItems.validId);
+        formData.append("remarks", remarks);
         formData.append("currentDateTime", new Date().toISOString().slice(0, 19).replace("T", " "));
     
         // Append the file (deathCertificate should be from an <input type="file"> element)
@@ -148,7 +153,7 @@ function ManageBurialContent(){
                 title: "Transaction Failed",
                 text: err.message || "An error occurred while saving the hospital bill.",
             });
-        } */
+        }
     };
     
 
@@ -219,6 +224,12 @@ function ManageBurialContent(){
         formData.append("contactPersonServiceCovered", contactPersonServiceCovered);
         formData.append("contactPersonFuneralService", contactPersonFuneralService);
         formData.append("contactPersonEncoded", contactPersonEncoded);
+        formData.append("burialStatus", burialStatus);
+        formData.append("barangayIndigency", checkedItems.barangayIndigency);
+        formData.append("checkDeathCertificate", checkedItems.deathCertificate);
+        formData.append("funeralContract", checkedItems.funeralContract);
+        formData.append("validId", checkedItems.validId);
+        formData.append("remarks", remarks);
         formData.append("currentDateTime", new Date().toISOString().slice(0, 19).replace("T", " "));
     
         if (deathCertificate) {
@@ -640,7 +651,7 @@ function ManageBurialContent(){
                                                 className={`btn w-100 ${formPage === "Checklist" ? "btn-secondary" : "btn-success"}`} 
                                                 onClick={() => handleFormPageUpdate("Checklist")}
                                             >
-                                                <i class="bi bi-card-checklist"></i> Checklist
+                                                <i class="bi bi-card-checklist"></i> Burial Requirements
                                             </button>
                                         </div> 
     
