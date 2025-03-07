@@ -44,6 +44,8 @@ function ManageHospitalBillContent(){
     const [isEditMode, setIsEditMode] = useState(false);
     const [modalName, setModalName] = useState();
     // Variables for pagination -------------------------------
+    
+    const [formPage, setFormPage] = useState("Basic Information");
 
     const handleAddHospitalBill = async (e) => {
         e.preventDefault();
@@ -361,6 +363,10 @@ function ManageHospitalBillContent(){
         setBarangayList(municipalityBarangays[selectedMunicipality] || []);
     };  
     
+    const handleFormPageUpdate = (formPageNumber) => {
+        setFormPage(formPageNumber);
+    }
+    
     return(
         <>
             <main id="main" className="main">
@@ -516,247 +522,359 @@ function ManageHospitalBillContent(){
                         </div>
                         <div className="modal-body">
                             <form>
-                                 
-                                <h3>Patient Information</h3><br />
-                                <div className="row"> 
-                                    <div className="col-3">               
-                                        <label htmlFor="firstName" className="form-label">First Name:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="firstName"
-                                            value={patientFirstName}
-                                            onChange={(e) => setPatientFirstName(e.target.value.trim())} 
-                                        />
-                                    </div>
-
-                                    <div className="col-3"> 
-                                        <label htmlFor="middleName" className="form-label">Middle Name:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="middleName"
-                                            value={patientMiddleName}
-                                            onChange={(e) => setPatientMiddleName(e.target.value.trim())} 
-                                        />
-                                    </div>
-                                    
-                                    <div className="col-3"> 
-                                        <label htmlFor="lastName" className="form-label">Last Name:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="lastName"
-                                            value={patientLastName}
-                                            onChange={(e) => setPatientLastName(e.target.value.trim())} 
-                                        />
-                                    </div>
-                                    
-                                    <div className="col-3"> 
-                                        <label htmlFor="extName" className="form-label">Ext Name:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="extName"
-                                            value={patientExtName}
-                                            onChange={(e) => setPatientExtName(e.target.value.trim())} 
-                                        />
-                                    </div>
-
-                                    <div className="col-3">
-                                        <br />
-                                        <label className="form-label">Province:</label>
-                                        <select
-                                            className="form-control"
-                                            value={patientProvince}
-                                            disabled
-                                        >
-                                            <option value="Camarines Norte">Camarines Norte</option>
-                                        </select>
-                                    </div>
- 
-                                    <div className="col-3">
-                                        <br />
-                                        <label className="form-label">Municipality:</label>
-                                        <select
-                                            className="form-control"
-                                            value={patientMunicipality}
-                                            onChange={handleMunicipalityChange}
-                                        >
-                                            <option value="">Select Municipality</option>
-                                            {Object.keys(municipalityBarangays).map((municipality) => (
-                                                <option key={municipality} value={municipality}>
-                                                    {municipality}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
- 
-                                    <div className="col-3">
-                                        <br />
-                                        <label className="form-label">Barangay:</label>
-                                        <select
-                                            className="form-control"
-                                            value={patientBarangay}
-                                            onChange={(e) => setPatientBarangay(e.target.value.trim())}
-                                            disabled={barangayList.length === 0}
-                                        >
-                                            <option value="">Select Barangay</option>
-                                            {barangayList.map((barangay) => (
-                                                <option key={barangay} value={barangay}>
-                                                    {barangay}
-                                                </option>
-                                            ))} : {
-                                                <option key={patientBarangay} value={patientBarangay}>
-                                                    {patientBarangay}
-                                                </option>
-                                            }
                                 
-                                        </select>
-                                    </div>
- 
-                                    <div className="col-3">
-                                        <br />
-                                        <label className="form-label">Purok:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            value={patientPurok}
-                                            onChange={(e) => setPatientPurok(e.target.value)}
-                                        />
+                            <div className="generateContainer">
+                                    
+                                    <h5>Select Section: </h5>
+                                    <br />
+                                    <div className="row">  
+                                        <div className="col-6">
+                                            <button 
+                                                type="button" 
+                                                className={`btn w-100 ${formPage === "Basic Information" ? "btn-secondary" : "btn-success"}`} 
+                                                onClick={() => handleFormPageUpdate("Basic Information")}
+                                            >
+                                                <i class="bi bi-person-vcard"></i> Basic Information
+                                            </button>
+                                        </div>
+
+                                        <div className="col-6">
+                                            <button 
+                                                type="button" 
+                                                className={`btn w-100 ${formPage === "Checklist" ? "btn-secondary" : "btn-success"}`} 
+                                                onClick={() => handleFormPageUpdate("Checklist")}
+                                            >
+                                                <i class="bi bi-card-checklist"></i> Hospital Bill Requirements
+                                            </button>
+                                        </div> 
+    
+
                                     </div>  
-                                    
-                                    <div className="col-12">
-                                        <br /> 
-                                        <label htmlFor="extName" className="form-label">Hospital:</label>
-                                          
-
-                                        <select
-                                            className="form-control"
-                                            id="hospital"   
-                                            value={patientHospital}
-                                            onChange={(e) => setPatientHospital(e.target.value)} >
-                                                <option value="">Select Hospital</option>
-                                                <option value="LEON D. HERNANDEZ MEMORIAL HOSPITAL">LEON D. HERNANDEZ MEMORIAL HOSPITAL</option>
-                                                <option value="DAET DOCTORS HOSPITAL">DAET DOCTORS HOSPITAL</option>
-                                                <option value="DR. MOISES V. CACAWA HOSPITAL">DR. MOISES V. CACAWA HOSPITAL</option>
-                                                <option value="OUR LADY OF LOURDES HOSPITAL">OUR LADY OF LOURDES HOSPITAL</option>
-                                                <option value="SANTISSIMA TRINIDAD OF DAET">SANTISSIMA TRINIDAD OF DAET</option>
-                                                <option value="RACELIS TIONGSON MEDICAL CLINIC">RACELIS TIONGSON MEDICAL CLINIC</option>
-                                                <option value="LIZASO HOSPITAL">LIZASO HOSPITAL</option>
-                                                <option value="DR. MIGUEL V. ALEGRE HOSPITAL">DR. MIGUEL V. ALEGRE HOSPITAL</option>
-                                                <option value="BARRIOS-BUSIÑOS MEDICAL CLINIC AND HOSPITAL">BARRIOS-BUSIÑOS MEDICAL CLINIC AND HOSPITAL</option>
-                                                <option value="JOSE PANGANIBAN PRIMARY HOSPITAL">JOSE PANGANIBAN PRIMARY HOSPITAL</option> 
-                                        </select>
-                                    </div>
- 
                                 </div> 
-                                <br />  
-                                <h3>Claimant Information</h3><br />
-                                <div className="row">
-                                    <div className="col-3"> 
-                                        <label htmlFor="firstName" className="form-label">First Name:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="firstName"
-                                            value={claimantFirstname}
-                                            onChange={(e) => setClaimantFname(e.target.value)} 
-                                        />
-                                    </div>
 
-                                    <div className="col-3"> 
-                                        <label htmlFor="middleName" className="form-label">Middle Name:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="middleName"
-                                            value={claimantMiddlename}
-                                            onChange={(e) => setClaimantMname(e.target.value)} 
-                                        />
-                                    </div>
-                                    
-                                    <div className="col-3"> 
-                                        <label htmlFor="lastName" className="form-label">Last Name:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="lastName"
-                                            value={claimantLastname}
-                                            onChange={(e) => setClaimantLname(e.target.value)}
-                                        />
-                                    </div>
-                                    
-                                    <div className="col-3">              
-                                        <label htmlFor="extName" className="form-label">Ext Name:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="extName"
-                                            value={claimantExtName}
-                                            onChange={(e) => setClaimantExtName(e.target.value)}
-                                        />
-                                    </div>
+                                { formPage == "Basic Information" && 
+                                    <>
 
-                                    
-                                    <div className="col-3">
-                                        <br />
-                                        <label htmlFor="relationship" className="form-label">Relationship:</label>
-                                        <select
-                                            className="form-control"
-                                            id="relationship"
-                                            value={claimantRelationship}
-                                            onChange={(e) => setClaimantRelationship(e.target.value)}
-                                        >
-                                            <option value="">Select Relationship</option>
-                                            <option value="Mother">Mother</option>
-                                            <option value="Father">Father</option>
-                                            <option value="Child">Child</option>
-                                            <option value="Father">Self</option>
-                                            <option value="Parent">Parent</option>
-                                            <option value="Sibling">Sibling</option>
-                                            <option value="Spouse">Spouse</option>
-                                            <option value="Grandparent">Grandparent</option>
-                                            <option value="Relative">Relative</option>
-                                            <option value="Friend">Friend</option>
-                                            <option value="Guardian">Guardian</option>
-                                            <option value="Other">Other</option>
-                                        </select>
-                                    </div>
+                                        <div className="formContainer">
+                                            <h3>Patient Information</h3><br />
+                                            <div className="row"> 
+                                                <div className="col-3">               
+                                                    <label htmlFor="firstName" className="form-label">First Name:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="firstName"
+                                                        value={patientFirstName}
+                                                        onChange={(e) => setPatientFirstName(e.target.value.trim())} 
+                                                    />
+                                                </div>
 
-                                    
-                                    <div className="col-3">
-                                        <br />
-                                        <label htmlFor="extName" className="form-label">Contact:</label>
-                                        <input
-                                            type="number"
-                                            className="form-control"
-                                            id="extName"
-                                            value={claimantContact}
-                                            onChange={(e) => setClaimantContact(e.target.value)} 
-                                        />
-                                    </div>
-                                    
-                                    <div className="col-3">
-                                        <br />
-                                        <label htmlFor="extName" className="form-label">Amount:</label>
-                                        <input
-                                            type="number"
-                                            className="form-control"
-                                            id="extName"
-                                            value={claimantAmount}
-                                            onChange={(e) => setClaimantAmount(e.target.value)} 
-                                        />
-                                    </div>
-                                     
-                                    
-                                </div>
+                                                <div className="col-3"> 
+                                                    <label htmlFor="middleName" className="form-label">Middle Name:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="middleName"
+                                                        value={patientMiddleName}
+                                                        onChange={(e) => setPatientMiddleName(e.target.value.trim())} 
+                                                    />
+                                                </div>
+                                                
+                                                <div className="col-3"> 
+                                                    <label htmlFor="lastName" className="form-label">Last Name:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="lastName"
+                                                        value={patientLastName}
+                                                        onChange={(e) => setPatientLastName(e.target.value.trim())} 
+                                                    />
+                                                </div>
+                                                
+                                                <div className="col-3"> 
+                                                    <label htmlFor="extName" className="form-label">Ext Name:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="extName"
+                                                        value={patientExtName}
+                                                        onChange={(e) => setPatientExtName(e.target.value.trim())} 
+                                                    />
+                                                </div>
 
-                                <br />
+                                                <div className="col-3">
+                                                    <br />
+                                                    <label className="form-label">Province:</label>
+                                                    <select
+                                                        className="form-control"
+                                                        value={patientProvince}
+                                                        disabled
+                                                    >
+                                                        <option value="Camarines Norte">Camarines Norte</option>
+                                                    </select>
+                                                </div>
+            
+                                                <div className="col-3">
+                                                    <br />
+                                                    <label className="form-label">Municipality:</label>
+                                                    <select
+                                                        className="form-control"
+                                                        value={patientMunicipality}
+                                                        onChange={handleMunicipalityChange}
+                                                    >
+                                                        <option value="">Select Municipality</option>
+                                                        {Object.keys(municipalityBarangays).map((municipality) => (
+                                                            <option key={municipality} value={municipality}>
+                                                                {municipality}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+            
+                                                <div className="col-3">
+                                                    <br />
+                                                    <label className="form-label">Barangay:</label>
+                                                    <select
+                                                        className="form-control"
+                                                        value={patientBarangay}
+                                                        onChange={(e) => setPatientBarangay(e.target.value.trim())}
+                                                        disabled={barangayList.length === 0}
+                                                    >
+                                                        <option value="">Select Barangay</option>
+                                                        {barangayList.map((barangay) => (
+                                                            <option key={barangay} value={barangay}>
+                                                                {barangay}
+                                                            </option>
+                                                        ))} : {
+                                                            <option key={patientBarangay} value={patientBarangay}>
+                                                                {patientBarangay}
+                                                            </option>
+                                                        }
+                                            
+                                                    </select>
+                                                </div>
+            
+                                                <div className="col-3">
+                                                    <br />
+                                                    <label className="form-label">Purok:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        value={patientPurok}
+                                                        onChange={(e) => setPatientPurok(e.target.value)}
+                                                    />
+                                                </div>  
+                                                
+                                                <div className="col-12">
+                                                    <br /> 
+                                                    <label htmlFor="extName" className="form-label">Hospital:</label>
+                                                    
 
+                                                    <select
+                                                        className="form-control"
+                                                        id="hospital"   
+                                                        value={patientHospital}
+                                                        onChange={(e) => setPatientHospital(e.target.value)} >
+                                                            <option value="">Select Hospital</option>
+                                                            <option value="LEON D. HERNANDEZ MEMORIAL HOSPITAL">LEON D. HERNANDEZ MEMORIAL HOSPITAL</option>
+                                                            <option value="DAET DOCTORS HOSPITAL">DAET DOCTORS HOSPITAL</option>
+                                                            <option value="DR. MOISES V. CACAWA HOSPITAL">DR. MOISES V. CACAWA HOSPITAL</option>
+                                                            <option value="OUR LADY OF LOURDES HOSPITAL">OUR LADY OF LOURDES HOSPITAL</option>
+                                                            <option value="SANTISSIMA TRINIDAD OF DAET">SANTISSIMA TRINIDAD OF DAET</option>
+                                                            <option value="RACELIS TIONGSON MEDICAL CLINIC">RACELIS TIONGSON MEDICAL CLINIC</option>
+                                                            <option value="LIZASO HOSPITAL">LIZASO HOSPITAL</option>
+                                                            <option value="DR. MIGUEL V. ALEGRE HOSPITAL">DR. MIGUEL V. ALEGRE HOSPITAL</option>
+                                                            <option value="BARRIOS-BUSIÑOS MEDICAL CLINIC AND HOSPITAL">BARRIOS-BUSIÑOS MEDICAL CLINIC AND HOSPITAL</option>
+                                                            <option value="JOSE PANGANIBAN PRIMARY HOSPITAL">JOSE PANGANIBAN PRIMARY HOSPITAL</option> 
+                                                    </select>
+                                                </div>
+            
+                                            </div> 
+                                            <br />
+                                            <hr /> 
+                                            <br />  
+                                            <h3>Claimant Information</h3><br />
+                                            <div className="row">
+                                                <div className="col-3"> 
+                                                    <label htmlFor="firstName" className="form-label">First Name:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="firstName"
+                                                        value={claimantFirstname}
+                                                        onChange={(e) => setClaimantFname(e.target.value)} 
+                                                    />
+                                                </div>
 
-                                
+                                                <div className="col-3"> 
+                                                    <label htmlFor="middleName" className="form-label">Middle Name:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="middleName"
+                                                        value={claimantMiddlename}
+                                                        onChange={(e) => setClaimantMname(e.target.value)} 
+                                                    />
+                                                </div>
+                                                
+                                                <div className="col-3"> 
+                                                    <label htmlFor="lastName" className="form-label">Last Name:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="lastName"
+                                                        value={claimantLastname}
+                                                        onChange={(e) => setClaimantLname(e.target.value)}
+                                                    />
+                                                </div>
+                                                
+                                                <div className="col-3">              
+                                                    <label htmlFor="extName" className="form-label">Ext Name:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="extName"
+                                                        value={claimantExtName}
+                                                        onChange={(e) => setClaimantExtName(e.target.value)}
+                                                    />
+                                                </div>
+
+                                                
+                                                <div className="col-3">
+                                                    <br />
+                                                    <label htmlFor="relationship" className="form-label">Relationship:</label>
+                                                    <select
+                                                        className="form-control"
+                                                        id="relationship"
+                                                        value={claimantRelationship}
+                                                        onChange={(e) => setClaimantRelationship(e.target.value)}
+                                                    >
+                                                        <option value="">Select Relationship</option>
+                                                        <option value="Mother">Mother</option>
+                                                        <option value="Father">Father</option>
+                                                        <option value="Child">Child</option>
+                                                        <option value="Father">Self</option>
+                                                        <option value="Parent">Parent</option>
+                                                        <option value="Sibling">Sibling</option>
+                                                        <option value="Spouse">Spouse</option>
+                                                        <option value="Grandparent">Grandparent</option>
+                                                        <option value="Relative">Relative</option>
+                                                        <option value="Friend">Friend</option>
+                                                        <option value="Guardian">Guardian</option>
+                                                        <option value="Other">Other</option>
+                                                    </select>
+                                                </div>
+
+                                                
+                                                <div className="col-3">
+                                                    <br />
+                                                    <label htmlFor="extName" className="form-label">Contact:</label>
+                                                    <input
+                                                        type="number"
+                                                        className="form-control"
+                                                        id="extName"
+                                                        value={claimantContact}
+                                                        onChange={(e) => setClaimantContact(e.target.value)} 
+                                                    />
+                                                </div>
+                                                
+                                                <div className="col-3">
+                                                    <br />
+                                                    <label htmlFor="extName" className="form-label">Amount:</label>
+                                                    <input
+                                                        type="number"
+                                                        className="form-control"
+                                                        id="extName"
+                                                        value={claimantAmount}
+                                                        onChange={(e) => setClaimantAmount(e.target.value)} 
+                                                    />
+                                                </div>
+                                                
+                                                
+                                            </div>
+
+                                            <br />
+
+                                        </div>
+
+                                    </>
+                                } 
+
+                                {formPage === "Checklist" && (
+                                    <> 
+                                        <div className="row"> 
+                                            <div className="col-12">
+                                                <div className="formContainer">
+                                                    <h3>Hospital Bill Status: </h3><br/>
+                                                    <p>Current Status: <b>Pending</b></p><br/>  
+
+                                                    <select
+                                                        className="form-control"
+                                                        id="relationship"
+                                                        /* value={burialStatus}
+                                                        onChange={(e) => setBurialStatus(e.target.value)} */
+                                                    > 
+                                                        <option value="Pending">Pending</option>
+                                                        <option value="Pending">Completed</option>
+                                                        <option value="Cancelled">Cancelled</option> 
+                                                    </select>
+
+                                                </div>
+                                                <br/>
+                                            </div>
+                                            
+                                            <div className="col-12">  
+                                                <div className="formContainer">
+                                                    <h3>Requirements Checklist:</h3>             
+                                                    <br/>
+                                                    <ul className="list-group">
+                                                        <li className="list-group-item">
+                                                            <input className="form-check-input me-1" type="checkbox" id="checkBarangayIndigency" 
+                                                                /* checked={checkedItems.checkBarangayIndigency} // Matches state key
+                                                                onChange={handleCheckboxChange} *//>
+                                                            <label className="form-check-label" htmlFor="checkBarangayIndigency">&nbsp; Barangay Indigency (2 Original)</label>
+                                                        </li>
+                                                        <li className="list-group-item">
+                                                            <input className="form-check-input me-1" type="checkbox" id="checkDeathCertificate" 
+                                                                /* checked={checkedItems.checkDeathCertificate} 
+                                                                onChange={handleCheckboxChange} *//>
+                                                            <label className="form-check-label" htmlFor="checkDeathCertificate">&nbsp; Death Certificate (2 Copies)</label>
+                                                        </li>
+                                                        <li className="list-group-item">
+                                                            <input className="form-check-input me-1" type="checkbox" id="checkFuneralContract" 
+                                                                /* checked={checkedItems.checkFuneralContract}
+                                                                onChange={handleCheckboxChange} *//>
+                                                            <label className="form-check-label" htmlFor="checkFuneralContract">&nbsp; Funeral Contract (2 Copies)</label>
+                                                        </li>
+                                                        <li className="list-group-item">
+                                                            <input className="form-check-input me-1" type="checkbox" id="checkValidId" 
+                                                                /* checked={checkedItems.checkValidId}
+                                                                onChange={handleCheckboxChange} */ />
+                                                            <label className="form-check-label" htmlFor="checkValidId">&nbsp; Valid Identification (2 Copies)</label>
+                                                        </li>
+                                                    </ul>
+                                                </div> 
+                                            </div>
+                                            
+                                            <div className="col-12">
+                                                <br/>
+                                                <div className="formContainer">
+                                                    <h3>Remarks:</h3>             
+                                                    <br/>
+
+                                                    <textarea className="form-control" id="remarks" placeholder="Enter your remarks here" rows={5}
+                                                        /* value={remarks}
+                                                        onChange={(e) => setRemarks(e.target.value)} */ > 
+                                                    </textarea>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
                                 <div className="modal-footer">
+                                    
                                     <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
                                         Close
                                     </button>
@@ -764,7 +882,7 @@ function ManageHospitalBillContent(){
                                     { modalName == "Add" && 
                                         <>
                                             <button type="submit" className="btn btn-primary"
-                                            onClick={handleAddHospitalBill}>
+                                            onClick={handleAddBurialAssistance}>
                                                 Save
                                             </button> 
                                         </>
@@ -773,12 +891,13 @@ function ManageHospitalBillContent(){
                                     { modalName == "Edit" && 
                                         <>
                                             <button type="submit" className="btn btn-primary"
-                                            onClick={handleUpdateHospitalBill}>
+                                            onClick={handleUpdateBurialAssistance}>
                                                 Save
                                             </button> 
                                         </>
                                     }
                                 </div>
+                                    
                             </form>
                         </div>
                     </div>

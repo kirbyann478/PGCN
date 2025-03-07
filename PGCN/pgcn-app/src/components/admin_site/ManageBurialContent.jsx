@@ -38,13 +38,14 @@ function ManageBurialContent(){
     const [contactPersonFuneralService, setContactPersonFuneralCovered] = useState('');
     const [contactPersonEncoded, setContactPersonEncoded] = useState('');
     
-    const [burialStatus, setBurialStatus] = useState('');
+    const [burialStatus, setBurialStatus] = useState(''); 
     const [checkedItems, setCheckedItems] = useState({
-        barangayIndigency: null,
-        deathCertificate: null,
-        funeralContract: null,
-        validId: null
+        checkBarangayIndigency: false, 
+        checkDeathCertificate: false,
+        checkFuneralContract: false,
+        checkValidId: false
     });
+    
     const [remarks, setRemarks] = useState('');
     // Variables for inputs ------------------------------------------------------------
 
@@ -64,7 +65,7 @@ function ManageBurialContent(){
     
     const [formPage, setFormPage] = useState("Basic Information");
 
-    const handleAddHospitalBill = async (e) => {
+    const handleAddBurialAssistance = async (e) => {
         e.preventDefault();
 
         console.log("Test Add: ", 
@@ -85,14 +86,18 @@ function ManageBurialContent(){
                 contactPersonLastname: contactPersonLastname,
                 contactPersonExtName: contactPersonExtName,
                 contactNumber: contactNumber,
-                contactPersonServiceCovered: contactPersonFuneralService,
+                contactPersonServiceCovered: contactPersonServiceCovered, 
                 contactPersonFuneralService: contactPersonFuneralService,
                 contactPersonEncoded: contactPersonEncoded,
                 burialStatus: burialStatus,
-                checkedItems: checkedItems,
+                barangayIndigency: checkedItems.checkBarangayIndigency, 
+                deathCertificate: checkedItems.checkDeathCertificate,
+                funeralContract: checkedItems.checkFuneralContract, 
+                validId: checkedItems.checkValidId, 
                 remarks: remarks
             }
-        )
+        );
+        
     
         const formData = new FormData();
         formData.append("account_id", account_id);
@@ -113,11 +118,12 @@ function ManageBurialContent(){
         formData.append("contactNumber", contactNumber);
         formData.append("contactPersonServiceCovered", contactPersonServiceCovered);
         formData.append("contactPersonFuneralService", contactPersonFuneralService);
+        formData.append("contactPersonEncoded", contactPersonEncoded);
         formData.append("burialStatus", burialStatus);
-        formData.append("barangayIndigency", checkedItems.barangayIndigency);
-        formData.append("deathCertificate", checkedItems.deathCertificate);
-        formData.append("funeralContract", checkedItems.funeralContract);
-        formData.append("validId", checkedItems.validId);
+        formData.append("barangayIndigency", checkedItems.checkBarangayIndigency);
+        formData.append("checkDeathCertificate", checkedItems.checkDeathCertificate);
+        formData.append("funeralContract", checkedItems.checkFuneralContract);
+        formData.append("validId", checkedItems.checkValidId);
         formData.append("remarks", remarks);
         formData.append("currentDateTime", new Date().toISOString().slice(0, 19).replace("T", " "));
     
@@ -225,10 +231,10 @@ function ManageBurialContent(){
         formData.append("contactPersonFuneralService", contactPersonFuneralService);
         formData.append("contactPersonEncoded", contactPersonEncoded);
         formData.append("burialStatus", burialStatus);
-        formData.append("barangayIndigency", checkedItems.barangayIndigency);
-        formData.append("checkDeathCertificate", checkedItems.deathCertificate);
-        formData.append("funeralContract", checkedItems.funeralContract);
-        formData.append("validId", checkedItems.validId);
+        formData.append("barangayIndigency", checkedItems.checkBarangayIndigency);
+        formData.append("checkDeathCertificate", checkedItems.checkDeathCertificate);
+        formData.append("funeralContract", checkedItems.checkFuneralContract);
+        formData.append("validId", checkedItems.checkValidId);
         formData.append("remarks", remarks);
         formData.append("currentDateTime", new Date().toISOString().slice(0, 19).replace("T", " "));
     
@@ -330,6 +336,17 @@ function ManageBurialContent(){
         setContactPersonServiceCovered(burial['contact_service_covered']);
         setContactPersonFuneralCovered(burial['contact_funeral_service']);
         setContactPersonEncoded(burial['contact_person_encoded']);
+        
+        setBurialStatus(burial['burial_status']); 
+        setCheckedItems({
+            checkBarangayIndigency: burial['check_barangay_indigency'] === 1 || burial['check_barangay_indigency'] === "true",
+            checkDeathCertificate: burial['check_death_certificate'] === 1 || burial['check_death_certificate'] === "true",
+            checkFuneralContract: burial['check_funeral_contract'] === 1 || burial['check_funeral_contract'] === "true",
+            checkValidId: burial['check_valid_id'] === 1 || burial['check_valid_id'] === "true",
+        });
+        
+
+        setRemarks(burial['remarks']);
         
         // Convert BLOB to Base64 if it's present
         if (burial['death_certificate']) {
@@ -983,8 +1000,7 @@ function ManageBurialContent(){
                                                             id="relationship"
                                                             value={burialStatus}
                                                             onChange={(e) => setBurialStatus(e.target.value)}
-                                                        >
-                                                            <option value="">Select burial status:</option>
+                                                        > 
                                                             <option value="Pending">Pending</option>
                                                             <option value="Pending">Completed</option>
                                                             <option value="Cancelled">Cancelled</option> 
@@ -1001,25 +1017,25 @@ function ManageBurialContent(){
                                                         <ul className="list-group">
                                                             <li className="list-group-item">
                                                                 <input className="form-check-input me-1" type="checkbox" id="checkBarangayIndigency" 
-                                                                    checked={checkedItems.barangayIndigency}
+                                                                    checked={checkedItems.checkBarangayIndigency} // Matches state key
                                                                     onChange={handleCheckboxChange}/>
-                                                                <label className="form-check-label" htmlFor="barangayIndigency">&nbsp; Barangay Indigency (2 Original)</label>
+                                                                <label className="form-check-label" htmlFor="checkBarangayIndigency">&nbsp; Barangay Indigency (2 Original)</label>
                                                             </li>
                                                             <li className="list-group-item">
                                                                 <input className="form-check-input me-1" type="checkbox" id="checkDeathCertificate" 
-                                                                    checked={checkedItems.deathCertificate}
+                                                                    checked={checkedItems.checkDeathCertificate} 
                                                                     onChange={handleCheckboxChange}/>
                                                                 <label className="form-check-label" htmlFor="checkDeathCertificate">&nbsp; Death Certificate (2 Copies)</label>
                                                             </li>
                                                             <li className="list-group-item">
                                                                 <input className="form-check-input me-1" type="checkbox" id="checkFuneralContract" 
-                                                                    checked={checkedItems.funeralContract}
+                                                                    checked={checkedItems.checkFuneralContract}
                                                                     onChange={handleCheckboxChange}/>
                                                                 <label className="form-check-label" htmlFor="checkFuneralContract">&nbsp; Funeral Contract (2 Copies)</label>
                                                             </li>
                                                             <li className="list-group-item">
                                                                 <input className="form-check-input me-1" type="checkbox" id="checkValidId" 
-                                                                    checked={checkedItems.validId}
+                                                                    checked={checkedItems.checkValidId}
                                                                     onChange={handleCheckboxChange}/>
                                                                 <label className="form-check-label" htmlFor="checkValidId">&nbsp; Valid Identification (2 Copies)</label>
                                                             </li>
@@ -1052,7 +1068,7 @@ function ManageBurialContent(){
                                         { modalName == "Add" && 
                                             <>
                                                 <button type="submit" className="btn btn-primary"
-                                                onClick={handleAddHospitalBill}>
+                                                onClick={handleAddBurialAssistance}>
                                                     Save
                                                 </button> 
                                             </>

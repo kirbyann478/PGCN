@@ -424,15 +424,21 @@ app.post("/insert_burial_assistance", upload.single("deathCertificate"), (req, r
         currentDateTime
     } = req.body;  
 
-    const deathCertificate = req.file ? req.file.buffer : null; // Convert file to buffer
+    console.log(
+        contactPersonEncoded, 'Testttt'
+    )
+
+    const deathCertificate = req.file ? req.file.path : null; // Store file path instead of binary
 
     const insertBurialAssistanceQuery = `
         INSERT INTO burial_assistance 
         (account_id, deceased_fname, deceased_mname, deceased_lname, deceased_ext_name, 
         deceased_purok, deceased_barangay, deceased_municipality, deceased_province, 
         deceased_gender, deceased_deathdate, death_certificate, contact_fname, contact_mname, contact_lname, contact_ext_name, contact_number,
-        contact_service_covered, contact_funeral_service, contact_person_encoded, savedAt) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        contact_service_covered, contact_funeral_service, contact_person_encoded, 
+        burial_status, check_barangay_indigency, check_death_certificate, check_funeral_contract, check_valid_id, 
+        remarks, savedAt) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     db.getConnection((err, connection) => {
@@ -453,7 +459,9 @@ app.post("/insert_burial_assistance", upload.single("deathCertificate"), (req, r
                 deceasedFirstName, deceasedMiddleName, deceasedLastName, deceasedExtName, 
                 deceasedPurok, deceasedBarangay, deceasedMunicipality, deceasedProvince, deceasedGender, deceasedDeathDate, deathCertificate,
                 contactPersonFirstname, contactPersonMiddlename, contactPersonLastname, contactPersonExtName, contactNumber,
-                contactPersonServiceCovered, contactPersonFuneralService, contactPersonEncoded, currentDateTime
+                contactPersonServiceCovered, contactPersonFuneralService, contactPersonEncoded, 
+                burialStatus, barangayIndigency, checkDeathCertificate, funeralContract, validId, 
+                remarks, currentDateTime
             ], (err, result) => {        
                 if (err) {
                     console.error("Burial Assistance Insertion Error:", err.sqlMessage || err);
@@ -464,21 +472,19 @@ app.post("/insert_burial_assistance", upload.single("deathCertificate"), (req, r
                 }
 
                 connection.commit((err) => {
+                    connection.release(); // Ensure connection is always released
                     if (err) {
                         console.error("Transaction Commit Error:", err);
-                        return connection.rollback(() => {
-                            connection.release();
-                            res.status(500).json({ error: "Transaction commit failed." });
-                        });
+                        return res.status(500).json({ error: "Transaction commit failed." });
                     }
 
-                    connection.release();
                     res.json({ message: "Burial assistance record inserted successfully!", burial_id: result.insertId });
                 });
             });
         });
     });
 });
+
 
 app.get("/retrieve_burial_assistance", (req, res) => {
     db.query("SELECT * FROM burial_assistance", (err, results) => {
@@ -506,7 +512,9 @@ app.post("/update_burial_assistance", upload.single("deathCertificate"), (req, r
         deceasedFirstName, deceasedMiddleName, deceasedLastName, deceasedExtName,
         deceasedPurok, deceasedBarangay, deceasedMunicipality, deceasedProvince, deceasedGender, deceasedDeathDate,
         contactPersonFirstname, contactPersonMiddlename, contactPersonLastname, contactPersonExtName, contactNumber,
-        contactPersonServiceCovered, contactPersonFuneralService, contactPersonEncoded, currentDateTime
+        contactPersonServiceCovered, contactPersonFuneralService, contactPersonEncoded, 
+        burialStatus, barangayIndigency, checkDeathCertificate, funeralContract, validId, 
+        remarks, currentDateTime
     } = req.body;
 
     const deathCertificate = req.file ? req.file.buffer : null;
@@ -516,7 +524,9 @@ app.post("/update_burial_assistance", upload.single("deathCertificate"), (req, r
         account_id = ?, deceased_fname = ?, deceased_mname = ?, deceased_lname = ?, deceased_ext_name = ?, 
         deceased_purok = ?, deceased_barangay = ?, deceased_municipality = ?, deceased_province = ?,
         deceased_gender = ?, deceased_deathdate = ?, contact_fname = ?, contact_mname = ?, contact_lname = ?, contact_ext_name = ?, contact_number = ?,
-        contact_service_covered = ?, contact_funeral_service = ?, contact_person_encoded = ?, savedAt = ?
+        contact_service_covered = ?, contact_funeral_service = ?, contact_person_encoded = ?, 
+        check_barangay_indigency = ?, check_death_certificate = ?, check_funeral_contract = ?, check_valid_id = ?, burial_status = ?,
+        remarks = ?, savedAt = ?
     `;
 
     const queryParams = [
@@ -524,7 +534,9 @@ app.post("/update_burial_assistance", upload.single("deathCertificate"), (req, r
         deceasedFirstName, deceasedMiddleName, deceasedLastName, deceasedExtName,
         deceasedPurok, deceasedBarangay, deceasedMunicipality, deceasedProvince, deceasedGender, deceasedDeathDate,
         contactPersonFirstname, contactPersonMiddlename, contactPersonLastname, contactPersonExtName, contactNumber,
-        contactPersonServiceCovered, contactPersonFuneralService, contactPersonEncoded, currentDateTime
+        contactPersonServiceCovered, contactPersonFuneralService, contactPersonEncoded, 
+        burialStatus, barangayIndigency, checkDeathCertificate, funeralContract, validId, 
+        remarks, currentDateTime
     ];
 
     if (deathCertificate) {

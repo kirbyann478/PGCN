@@ -47,7 +47,8 @@ function NavBar() {
                         {/* <img src="/assets/img/med_logo.png" alt="Logo" /> */}
                         <span className="d-none d-lg-block">PGCN</span>
                     </Link>
-                    <i className="bi bi-list toggle-sidebar-btn" onClick={toggleSidebar}></i>
+                    {/* <i className="bi bi-list toggle-sidebar-btn" onClick={toggleSidebar}></i> */}
+                    <i class='bx bx-menu toggle-sidebar-btn' onClick={toggleSidebar}></i>
                 </div>
 
                 <nav className="header-nav ms-auto">
