@@ -882,7 +882,7 @@ function ManageHospitalBillContent(){
                                     { modalName == "Add" && 
                                         <>
                                             <button type="submit" className="btn btn-primary"
-                                            onClick={handleAddBurialAssistance}>
+                                            onClick={handleAddHospitalBill}>
                                                 Save
                                             </button> 
                                         </>
@@ -891,7 +891,7 @@ function ManageHospitalBillContent(){
                                     { modalName == "Edit" && 
                                         <>
                                             <button type="submit" className="btn btn-primary"
-                                            onClick={handleUpdateBurialAssistance}>
+                                            onClick={handleUpdateHospitalBill}>
                                                 Save
                                             </button> 
                                         </>

@@ -4,11 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import Swal from "sweetalert2";
 import { Modal, Button, Form } from "react-bootstrap"; 
 import 'bootstrap/dist/css/bootstrap.min.css'; 
-import FetchLocalUserDetails from "./scripts/FetchLocalUser"; 
+import FetchLocalUserDetails from "./scripts/FetchLocalUser";  
 
 function ManageBurialContent(){
     const { localUserDetails } = FetchLocalUserDetails();
     const [ account_id, setLocalUserId ] = useState(null);
+    
+    const navigate = useNavigate(); // Use navigate for redirection 
 
     // Variables for inputs ------------------------------------------------------------
     const [burialId, setBurialId] = useState('');
@@ -306,6 +308,11 @@ function ManageBurialContent(){
         setIsEditMode(editMode);
         setModalName(modalName);
         PopulateForms(burial);  
+
+        if (modalName == "View"){
+            
+            navigate(`/admin/view_burial_assistance/${burial['burial_id']}`);
+        }   
     }; 
  
     const handleAddRecord = (editMode = false, modalName) => { 
@@ -573,8 +580,8 @@ function ManageBurialContent(){
                                                                             <td>{new Date(burial.savedAt).toLocaleString()}</td>
                                                                             <td>
                                                                                 <button className="btn btn-success" onClick={() => handleOpenModal(burial, true, "View")}
-                                                                                    data-bs-toggle="modal"
-                                                                                    data-bs-target="#addHospitalBillModal">
+                                                                                    /* data-bs-toggle="modal"
+                                                                                    data-bs-target="#addHospitalBillModal" */>
                                                                                     <i className='bx bx-info-circle' ></i> View
                                                                                 </button>
                                                                                 <button className="btn btn-primary" onClick={() => handleOpenModal(burial, true, "Edit")}
